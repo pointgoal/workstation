@@ -13,3 +13,21 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Logs
+logs/
+
+# target folder
+target/
+
+# packed file
+*.tar.gz
+
+# DS_Store
+.DS_Store
+
+# coverage file
+coverage.txt
+
+# For mac
+.idea/
