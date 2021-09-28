@@ -23,44 +23,7 @@ var doc = `{
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {
-        "/v1/greeter": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Greeter service",
-                "operationId": "1",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Input name",
-                        "name": "name",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/main.GreeterResponse"
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "definitions": {
-        "main.GreeterResponse": {
-            "type": "object",
-            "properties": {
-                "message": {
-                    "type": "string"
-                }
-            }
-        }
-    }
+    "paths": {}
 }`
 
 type swaggerInfo struct {
@@ -74,12 +37,12 @@ type swaggerInfo struct {
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = swaggerInfo{
-	Version:     "1.0",
+	Version:     "",
 	Host:        "",
 	BasePath:    "",
 	Schemes:     []string{},
-	Title:       "RK Swagger for Gin",
-	Description: "This is a greeter service with rk-boot.",
+	Title:       "",
+	Description: "",
 }
 
 type s struct{}

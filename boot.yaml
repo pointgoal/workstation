@@ -1,16 +1,15 @@
 ---
 app:
-  description: "Workstation backend"
+  description: "Workstation backend."
   homeURL: "https://pointgoal.io"
   docsURL: [ "https://pointgoal.io" ]
-  maintainers: [ "pointgoal" ]
+  maintainers: [ "PointGoal" ]
 gin:
   - name: greeter
     port: 8080
     enabled: true
     sw:
       enabled: true
-      jsonPath: "docs"
     commonService:
       enabled: true
     tv:
