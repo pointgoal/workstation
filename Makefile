@@ -22,7 +22,7 @@ test:
 
 .PHONY: swag
 swag:
-	@echo "[swag] Running swag... (Looking up at internal/ and output to ./docs)"
+	@echo "[swag] Running swag... (Looking up at pkg/ and output to ./docs)"
 	@swag init --parseInternal --propertyStrategy camelcase
 	@echo "------------------------------------[Done]"
 

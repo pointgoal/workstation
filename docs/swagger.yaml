@@ -1,4 +1,322 @@
+definitions:
+  project.CreateOrgResponse:
+    properties:
+      orgId:
+        type: string
+    type: object
+  project.CreateProjectRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  project.CreateProjectResponse:
+    properties:
+      orgId:
+        type: string
+      projId:
+        type: string
+    type: object
+  project.DeleteOrgResponse:
+    properties:
+      status:
+        type: boolean
+    type: object
+  project.DeleteProjectResponse:
+    properties:
+      status:
+        type: boolean
+    type: object
+  project.GetOrgResponse:
+    properties:
+      orgs:
+        $ref: '#/definitions/project.Organization'
+    type: object
+  project.GetProjectResponse:
+    properties:
+      orgId:
+        type: string
+      project:
+        $ref: '#/definitions/project.Project'
+    type: object
+  project.ListOrgsResponse:
+    properties:
+      orgs:
+        items:
+          $ref: '#/definitions/project.Organization'
+        type: array
+    type: object
+  project.ListProjectResponse:
+    properties:
+      orgId:
+        type: string
+      projects:
+        items:
+          $ref: '#/definitions/project.Project'
+        type: array
+    type: object
+  project.Organization:
+    properties:
+      createAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updateAt:
+        type: string
+    type: object
+  project.Project:
+    properties:
+      createAt:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updateAt:
+        type: string
+    type: object
+  project.UpdateOrgRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  project.UpdateOrgResponse:
+    properties:
+      status:
+        type: boolean
+    type: object
+  project.UpdateProjectRequest:
+    properties:
+      name:
+        type: string
+    type: object
+  project.UpdateProjectResponse:
+    properties:
+      status:
+        type: boolean
+    type: object
 info:
-  contact: {}
-paths: {}
+  contact:
+    email: lark@pointgoal.io
+    name: PointGoal team
+    url: https://github.com/pointgoal/workstation
+  description: This is workstation backend with rk-boot.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Workstation
+  version: "1.0"
+paths:
+  /v1/org:
+    get:
+      operationId: "1"
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.ListOrgsResponse'
+      summary: List organizations
+      tags:
+      - organization
+    put:
+      operationId: "3"
+      parameters:
+      - description: Organization name
+        in: query
+        name: org_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.CreateOrgResponse'
+      summary: Create organization
+      tags:
+      - organization
+  /v1/org/{org_id}:
+    delete:
+      operationId: "4"
+      parameters:
+      - description: Organization Id
+        in: query
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.DeleteOrgResponse'
+      summary: Delete organization
+      tags:
+      - organization
+    get:
+      operationId: "2"
+      parameters:
+      - description: Organization Id
+        in: path
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.GetOrgResponse'
+      summary: Get organization
+      tags:
+      - organization
+    post:
+      operationId: "5"
+      parameters:
+      - description: Organization
+        in: body
+        name: org
+        required: true
+        schema:
+          $ref: '#/definitions/project.UpdateOrgRequest'
+      - description: Organization Id
+        in: query
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.UpdateOrgResponse'
+      summary: Update organization
+      tags:
+      - organization
+  /v1/org/{org_id}/proj:
+    get:
+      operationId: "6"
+      parameters:
+      - description: Organization Id
+        in: query
+        name: org_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.ListProjectResponse'
+      summary: List projects
+      tags:
+      - project
+    put:
+      operationId: "8"
+      parameters:
+      - description: Organization Id
+        in: query
+        name: org_id
+        required: true
+        type: string
+      - description: Project
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/project.CreateProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.CreateProjectResponse'
+      summary: create project
+      tags:
+      - project
+  /v1/org/{org_id}/proj/{proj_id}:
+    delete:
+      operationId: "9"
+      parameters:
+      - description: Organization Id
+        in: query
+        name: org_id
+        required: true
+        type: string
+      - description: Project Id
+        in: query
+        name: proj_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.DeleteProjectResponse'
+      summary: delete project
+      tags:
+      - project
+    get:
+      operationId: "7"
+      parameters:
+      - description: Organization Id
+        in: query
+        name: org_id
+        required: true
+        type: string
+      - description: Project Id
+        in: query
+        name: proj_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.GetProjectResponse'
+      summary: Get project
+      tags:
+      - project
+    post:
+      operationId: "10"
+      parameters:
+      - description: Organization Id
+        in: query
+        name: org_id
+        required: true
+        type: string
+      - description: Project Id
+        in: query
+        name: proj_id
+        required: true
+        type: string
+      - description: Project
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/project.UpdateProjectRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/project.UpdateProjectResponse'
+      summary: update project
+      tags:
+      - project
 swagger: "2.0"

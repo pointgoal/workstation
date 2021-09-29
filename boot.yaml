@@ -5,11 +5,12 @@ app:
   docsURL: [ "https://pointgoal.io" ]
   maintainers: [ "PointGoal" ]
 gin:
-  - name: greeter
+  - name: workstation
     port: 8080
     enabled: true
     sw:
       enabled: true
+      jsonPath: "docs"
     commonService:
       enabled: true
     tv:
@@ -23,3 +24,5 @@ gin:
         enabled: true
       metricsProm:
         enabled: true
+project:
+  enabled: true
