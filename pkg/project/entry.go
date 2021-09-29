@@ -16,8 +16,11 @@ import (
 )
 
 const (
-	EntryName        = "ws-project-name"
-	EntryType        = "ws-project"
+	// EntryName name of entry
+	EntryName = "ws-project-name"
+	// EntryType type of entry
+	EntryType = "ws-project"
+	// EntryDescription description of entry
 	EntryDescription = "Entry for project management entry."
 )
 

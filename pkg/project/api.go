@@ -41,6 +41,7 @@ type ListOrgsResponse struct {
 	Orgs []*Organization `yaml:"orgs" json:"orgs"`
 }
 
+// ListOrgs
 // @Summary List organizations
 // @Id 1
 // @version 1.0
@@ -60,6 +61,7 @@ type GetOrgResponse struct {
 	Org *Organization `yaml:"orgs" json:"orgs"`
 }
 
+// GetOrg
 // @Summary Get organization
 // @Id 2
 // @version 1.0
@@ -80,6 +82,7 @@ type CreateOrgResponse struct {
 	OrgId string `yaml:"orgId" json:"orgId"`
 }
 
+// CreateOrg
 // @Summary Create organization
 // @Id 3
 // @version 1.0
@@ -102,6 +105,7 @@ type DeleteOrgResponse struct {
 	Status bool `yaml:"status" json:"status"`
 }
 
+// DeleteOrg
 // @Summary Delete organization
 // @Id 4
 // @version 1.0
@@ -124,10 +128,12 @@ type UpdateOrgResponse struct {
 	Status bool `yaml:"status" json:"status"`
 }
 
+// UpdateOrgRequest request body of update organization
 type UpdateOrgRequest struct {
 	Name string `yaml:"name" json:"name"`
 }
 
+// UpdateOrg
 // @Summary Update organization
 // @Id 5
 // @version 1.0
@@ -172,6 +178,7 @@ type ListProjectResponse struct {
 	Projects []*Project `yaml:"projects" json:"projects"`
 }
 
+// ListProjects
 // @Summary List projects
 // @Id 6
 // @version 1.0
@@ -196,6 +203,7 @@ type GetProjectResponse struct {
 	Project *Project `yaml:"project" json:"project"`
 }
 
+// GetProject
 // @Summary Get project
 // @Id 7
 // @version 1.0
@@ -227,6 +235,7 @@ type CreateProjectRequest struct {
 	Name string `yaml:"name" json:"name"`
 }
 
+// CreateProject
 // @Summary create project
 // @Id 8
 // @version 1.0
@@ -262,6 +271,7 @@ type DeleteProjectResponse struct {
 	Status bool `yaml:"status" json:"status"`
 }
 
+// DeleteProject
 // @Summary delete project
 // @Id 9
 // @version 1.0
@@ -292,6 +302,7 @@ type UpdateProjectRequest struct {
 	Name string `yaml:"name" json:"name"`
 }
 
+// UpdateProject
 // @Summary update project
 // @Id 10
 // @version 1.0

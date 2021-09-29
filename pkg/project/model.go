@@ -74,6 +74,7 @@ func (org *Organization) HasProject(id string) bool {
 	return contains
 }
 
+// ListProjects will returns all projects
 func (org *Organization) ListProjects() []*Project {
 	res := make([]*Project, 0)
 
@@ -116,6 +117,7 @@ type Project struct {
 	UpdateAt time.Time `yaml:"updateAt" json:"updateAt"`
 }
 
+// NewProject create a project with params
 func NewProject(name string) *Project {
 	id := utils.CreateId()
 	if len(name) < 1 {
