@@ -3,10 +3,11 @@
 // Use of this source code is governed by an Apache-style
 // license that can be found in the LICENSE file.
 
-package project
+package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/pointgoal/workstation/pkg/datastore"
 	"github.com/rookie-ninja/rk-entry/entry"
 	"github.com/rookie-ninja/rk-gin/boot"
 	"github.com/stretchr/testify/assert"
@@ -35,24 +36,26 @@ func TestInitApi_HappyCase(t *testing.T) {
 	assert.True(t, len(entry.Router.Routes()) > 0)
 }
 
-func TestListOrgs(t *testing.T) {
+func TestListOrg(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
-	ListOrgs(ctx)
+	ListOrg(ctx)
 
 	assert.Equal(t, 200, writer.StatusCode)
 }
 
-func TestGetOrgs(t *testing.T) {
+func TestGetOrg(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
@@ -61,11 +64,12 @@ func TestGetOrgs(t *testing.T) {
 	assert.Equal(t, 200, writer.StatusCode)
 }
 
-func TestCreateOrgs(t *testing.T) {
+func TestCreateOrg(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
@@ -74,11 +78,12 @@ func TestCreateOrgs(t *testing.T) {
 	assert.Equal(t, 200, writer.StatusCode)
 }
 
-func TestDeleteOrgs(t *testing.T) {
+func TestDeleteOrg(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
@@ -87,11 +92,12 @@ func TestDeleteOrgs(t *testing.T) {
 	assert.Equal(t, 200, writer.StatusCode)
 }
 
-func TestUpdateOrgs(t *testing.T) {
+func TestUpdateOrg(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
@@ -107,15 +113,16 @@ func TestUpdateOrgs(t *testing.T) {
 	assert.Equal(t, 200, writer.StatusCode)
 }
 
-func TestListProjects(t *testing.T) {
+func TestListProject(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
-	ListProjects(ctx)
+	ListProject(ctx)
 
 	assert.Equal(t, 200, writer.StatusCode)
 }
@@ -124,7 +131,8 @@ func TestGetProject(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
@@ -137,7 +145,8 @@ func TestCreateProject(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
@@ -156,7 +165,8 @@ func TestDeleteProject(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
@@ -169,7 +179,8 @@ func TestUpdateProject(t *testing.T) {
 	defer assertNotPanic(t)
 	defer rkentry.GlobalAppCtx.RemoveEntry("workstation")
 	rkgin.RegisterGinEntry(rkgin.WithNameGin("workstation"))
-	RegisterEntry()
+	datastore.RegisterMemory()
+	RegisterController()
 
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)

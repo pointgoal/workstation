@@ -46,7 +46,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.ListOrgsResponse"
+                            "$ref": "#/definitions/controller.ListOrgResponse"
                         }
                     }
                 }
@@ -64,7 +64,7 @@ var doc = `{
                     {
                         "type": "string",
                         "description": "Organization name",
-                        "name": "org_name",
+                        "name": "orgName",
                         "in": "query",
                         "required": true
                     }
@@ -73,13 +73,13 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.CreateOrgResponse"
+                            "$ref": "#/definitions/controller.CreateOrgResponse"
                         }
                     }
                 }
             }
         },
-        "/v1/org/{org_id}": {
+        "/v1/org/{orgId}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -91,9 +91,9 @@ var doc = `{
                 "operationId": "2",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Organization Id",
-                        "name": "org_id",
+                        "name": "orgId",
                         "in": "path",
                         "required": true
                     }
@@ -102,7 +102,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.GetOrgResponse"
+                            "$ref": "#/definitions/controller.GetOrgResponse"
                         }
                     }
                 }
@@ -123,13 +123,13 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/project.UpdateOrgRequest"
+                            "$ref": "#/definitions/controller.UpdateOrgRequest"
                         }
                     },
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Organization Id",
-                        "name": "org_id",
+                        "name": "orgId",
                         "in": "query",
                         "required": true
                     }
@@ -138,7 +138,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.UpdateOrgResponse"
+                            "$ref": "#/definitions/controller.UpdateOrgResponse"
                         }
                     }
                 }
@@ -154,9 +154,9 @@ var doc = `{
                 "operationId": "4",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Organization Id",
-                        "name": "org_id",
+                        "name": "orgId",
                         "in": "query",
                         "required": true
                     }
@@ -165,13 +165,13 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.DeleteOrgResponse"
+                            "$ref": "#/definitions/controller.DeleteOrgResponse"
                         }
                     }
                 }
             }
         },
-        "/v1/org/{org_id}/proj": {
+        "/v1/org/{orgId}/proj": {
             "get": {
                 "produces": [
                     "application/json"
@@ -183,9 +183,9 @@ var doc = `{
                 "operationId": "6",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Organization Id",
-                        "name": "org_id",
+                        "name": "orgId",
                         "in": "query",
                         "required": true
                     }
@@ -194,7 +194,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.ListProjectResponse"
+                            "$ref": "#/definitions/controller.ListProjectResponse"
                         }
                     }
                 }
@@ -210,9 +210,9 @@ var doc = `{
                 "operationId": "8",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Organization Id",
-                        "name": "org_id",
+                        "name": "orgId",
                         "in": "query",
                         "required": true
                     },
@@ -222,7 +222,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/project.CreateProjectRequest"
+                            "$ref": "#/definitions/controller.CreateProjectRequest"
                         }
                     }
                 ],
@@ -230,13 +230,13 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.CreateProjectResponse"
+                            "$ref": "#/definitions/controller.CreateProjectResponse"
                         }
                     }
                 }
             }
         },
-        "/v1/org/{org_id}/proj/{proj_id}": {
+        "/v1/org/{orgId}/proj/{projId}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -248,16 +248,16 @@ var doc = `{
                 "operationId": "7",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Organization Id",
-                        "name": "org_id",
+                        "name": "orgId",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Project Id",
-                        "name": "proj_id",
+                        "name": "projId",
                         "in": "query",
                         "required": true
                     }
@@ -266,7 +266,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.GetProjectResponse"
+                            "$ref": "#/definitions/controller.GetProjectResponse"
                         }
                     }
                 }
@@ -282,16 +282,16 @@ var doc = `{
                 "operationId": "10",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Organization Id",
-                        "name": "org_id",
+                        "name": "orgId",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Project Id",
-                        "name": "proj_id",
+                        "name": "projId",
                         "in": "query",
                         "required": true
                     },
@@ -301,7 +301,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/project.UpdateProjectRequest"
+                            "$ref": "#/definitions/controller.UpdateProjectRequest"
                         }
                     }
                 ],
@@ -309,7 +309,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.UpdateProjectResponse"
+                            "$ref": "#/definitions/controller.UpdateProjectResponse"
                         }
                     }
                 }
@@ -325,16 +325,16 @@ var doc = `{
                 "operationId": "9",
                 "parameters": [
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Organization Id",
-                        "name": "org_id",
+                        "name": "orgId",
                         "in": "query",
                         "required": true
                     },
                     {
-                        "type": "string",
+                        "type": "integer",
                         "description": "Project Id",
-                        "name": "proj_id",
+                        "name": "projId",
                         "in": "query",
                         "required": true
                     }
@@ -343,7 +343,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/project.DeleteProjectResponse"
+                            "$ref": "#/definitions/controller.DeleteProjectResponse"
                         }
                     }
                 }
@@ -351,15 +351,15 @@ var doc = `{
         }
     },
     "definitions": {
-        "project.CreateOrgResponse": {
+        "controller.CreateOrgResponse": {
             "type": "object",
             "properties": {
                 "orgId": {
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         },
-        "project.CreateProjectRequest": {
+        "controller.CreateProjectRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -367,18 +367,15 @@ var doc = `{
                 }
             }
         },
-        "project.CreateProjectResponse": {
+        "controller.CreateProjectResponse": {
             "type": "object",
             "properties": {
-                "orgId": {
-                    "type": "string"
-                },
                 "projId": {
-                    "type": "string"
+                    "type": "integer"
                 }
             }
         },
-        "project.DeleteOrgResponse": {
+        "controller.DeleteOrgResponse": {
             "type": "object",
             "properties": {
                 "status": {
@@ -386,7 +383,7 @@ var doc = `{
                 }
             }
         },
-        "project.DeleteProjectResponse": {
+        "controller.DeleteProjectResponse": {
             "type": "object",
             "properties": {
                 "status": {
@@ -394,113 +391,116 @@ var doc = `{
                 }
             }
         },
-        "project.GetOrgResponse": {
+        "controller.GetOrgResponse": {
             "type": "object",
             "properties": {
-                "orgs": {
-                    "$ref": "#/definitions/project.Organization"
-                }
-            }
-        },
-        "project.GetProjectResponse": {
-            "type": "object",
-            "properties": {
-                "orgId": {
-                    "type": "string"
+                "org": {
+                    "$ref": "#/definitions/datastore.Organization"
                 },
+                "projectIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "controller.GetProjectResponse": {
+            "type": "object",
+            "properties": {
                 "project": {
-                    "$ref": "#/definitions/project.Project"
+                    "$ref": "#/definitions/datastore.Project"
                 }
             }
         },
-        "project.ListOrgsResponse": {
+        "controller.ListOrgResponse": {
             "type": "object",
             "properties": {
-                "orgs": {
+                "orgList": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/project.Organization"
+                        "$ref": "#/definitions/datastore.Organization"
                     }
                 }
             }
         },
-        "project.ListProjectResponse": {
+        "controller.ListProjectResponse": {
             "type": "object",
             "properties": {
+                "projectList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/datastore.Project"
+                    }
+                }
+            }
+        },
+        "controller.UpdateOrgRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.UpdateOrgResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "controller.UpdateProjectRequest": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.UpdateProjectResponse": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "datastore.Organization": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "datastore.Project": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
                 "orgId": {
-                    "type": "string"
+                    "type": "integer"
                 },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/project.Project"
-                    }
-                }
-            }
-        },
-        "project.Organization": {
-            "type": "object",
-            "properties": {
-                "createAt": {
+                "updatedAt": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updateAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "project.Project": {
-            "type": "object",
-            "properties": {
-                "createAt": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "updateAt": {
-                    "type": "string"
-                }
-            }
-        },
-        "project.UpdateOrgRequest": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "project.UpdateOrgResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "boolean"
-                }
-            }
-        },
-        "project.UpdateProjectRequest": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "project.UpdateProjectResponse": {
-            "type": "object",
-            "properties": {
-                "status": {
-                    "type": "boolean"
                 }
             }
         }

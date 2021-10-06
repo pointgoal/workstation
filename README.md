@@ -3,6 +3,9 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [workstation](#workstation)
+  - [API](#api)
+    - [Organizations](#organizations)
+    - [Projects](#projects)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -13,3 +16,22 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Workstation backend.
+
+## API
+### Organizations
+| API | Description |
+| --- | --- |
+| GET /v1/org | List organizations |
+| PUT /v1/org | Create organization |
+| GET /v1/org/{orgId} | Get organization |
+| POST /v1/org/{orgId} | Update organization |
+| DELETE /v1/org/{orgId} | Delete organization |
+
+### Projects
+| API | Description |
+| --- | --- |
+| GET /v1/org/{orgId}/proj | List projects |
+| PUT /v1/org/{orgId}/proj | Create project |
+| GET /v1/org/{orgId}/proj/{projId} | Get project |
+| POST /v1/org/{orgId}/proj/{projId} | Update project |
+| DELETE /v1/org/{orgId}/proj/{projId} | Delete project |

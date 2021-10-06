@@ -24,5 +24,17 @@ gin:
         enabled: true
       metricsProm:
         enabled: true
-project:
+controller:
   enabled: true
+datastore:
+  enabled: true
+  provider: mySql
+  mySql:
+    user: root
+    pass: pass
+    protocol: tcp
+    addr: localhost:3306
+    params:
+      - "charset=utf8mb4"
+      - "parseTime=True"
+      - "loc=Local"
