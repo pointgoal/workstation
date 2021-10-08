@@ -130,7 +130,7 @@ var doc = `{
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -157,7 +157,7 @@ var doc = `{
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -186,7 +186,7 @@ var doc = `{
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -194,7 +194,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.ListProjectResponse"
+                            "$ref": "#/definitions/controller.ListProjResponse"
                         }
                     }
                 }
@@ -213,7 +213,7 @@ var doc = `{
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     },
                     {
@@ -222,7 +222,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.CreateProjectRequest"
+                            "$ref": "#/definitions/controller.CreateProjRequest"
                         }
                     }
                 ],
@@ -230,7 +230,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.CreateProjectResponse"
+                            "$ref": "#/definitions/controller.CreateProjResponse"
                         }
                     }
                 }
@@ -251,14 +251,14 @@ var doc = `{
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Project Id",
                         "name": "projId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -266,7 +266,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.GetProjectResponse"
+                            "$ref": "#/definitions/controller.GetProjResponse"
                         }
                     }
                 }
@@ -285,14 +285,14 @@ var doc = `{
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Project Id",
                         "name": "projId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     },
                     {
@@ -301,7 +301,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/controller.UpdateProjectRequest"
+                            "$ref": "#/definitions/controller.UpdateProjRequest"
                         }
                     }
                 ],
@@ -309,7 +309,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.UpdateProjectResponse"
+                            "$ref": "#/definitions/controller.UpdateProjResponse"
                         }
                     }
                 }
@@ -328,14 +328,14 @@ var doc = `{
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     },
                     {
                         "type": "integer",
                         "description": "Project Id",
                         "name": "projId",
-                        "in": "query",
+                        "in": "path",
                         "required": true
                     }
                 ],
@@ -343,7 +343,7 @@ var doc = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/controller.DeleteProjectResponse"
+                            "$ref": "#/definitions/controller.DeleteProjResponse"
                         }
                     }
                 }
@@ -359,7 +359,7 @@ var doc = `{
                 }
             }
         },
-        "controller.CreateProjectRequest": {
+        "controller.CreateProjRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -367,9 +367,12 @@ var doc = `{
                 }
             }
         },
-        "controller.CreateProjectResponse": {
+        "controller.CreateProjResponse": {
             "type": "object",
             "properties": {
+                "orgId": {
+                    "type": "integer"
+                },
                 "projId": {
                     "type": "integer"
                 }
@@ -383,7 +386,7 @@ var doc = `{
                 }
             }
         },
-        "controller.DeleteProjectResponse": {
+        "controller.DeleteProjResponse": {
             "type": "object",
             "properties": {
                 "status": {
@@ -395,21 +398,15 @@ var doc = `{
             "type": "object",
             "properties": {
                 "org": {
-                    "$ref": "#/definitions/datastore.Organization"
-                },
-                "projectIds": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                    "$ref": "#/definitions/controller.Org"
                 }
             }
         },
-        "controller.GetProjectResponse": {
+        "controller.GetProjResponse": {
             "type": "object",
             "properties": {
-                "project": {
-                    "$ref": "#/definitions/datastore.Project"
+                "proj": {
+                    "$ref": "#/definitions/controller.Proj"
                 }
             }
         },
@@ -419,19 +416,41 @@ var doc = `{
                 "orgList": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/datastore.Organization"
+                        "$ref": "#/definitions/controller.Org"
                     }
                 }
             }
         },
-        "controller.ListProjectResponse": {
+        "controller.ListProjResponse": {
             "type": "object",
             "properties": {
-                "projectList": {
+                "projList": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/datastore.Project"
+                        "$ref": "#/definitions/controller.Proj"
                     }
+                }
+            }
+        },
+        "controller.Org": {
+            "type": "object",
+            "properties": {
+                "meta": {
+                    "$ref": "#/definitions/repository.Org"
+                },
+                "projIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "controller.Proj": {
+            "type": "object",
+            "properties": {
+                "meta": {
+                    "$ref": "#/definitions/repository.Proj"
                 }
             }
         },
@@ -451,7 +470,7 @@ var doc = `{
                 }
             }
         },
-        "controller.UpdateProjectRequest": {
+        "controller.UpdateProjRequest": {
             "type": "object",
             "properties": {
                 "name": {
@@ -459,7 +478,7 @@ var doc = `{
                 }
             }
         },
-        "controller.UpdateProjectResponse": {
+        "controller.UpdateProjResponse": {
             "type": "object",
             "properties": {
                 "status": {
@@ -467,7 +486,7 @@ var doc = `{
                 }
             }
         },
-        "datastore.Organization": {
+        "repository.Org": {
             "type": "object",
             "properties": {
                 "createdAt": {
@@ -484,7 +503,7 @@ var doc = `{
                 }
             }
         },
-        "datastore.Project": {
+        "repository.Proj": {
             "type": "object",
             "properties": {
                 "createdAt": {

@@ -3,7 +3,7 @@
 // Use of this source code is governed by an Apache-style
 // license that can be found in the LICENSE file.
 
-package datastore
+package repository
 
 import (
 	"github.com/rookie-ninja/rk-common/common"
@@ -15,19 +15,19 @@ const (
 	EntryNameDefault = "datastore"
 )
 
-func GetDataStore() DataStore {
+func GetRepository() Repository {
 	raw := rkentry.GlobalAppCtx.GetEntry(EntryNameDefault)
 	if raw == nil {
 		return nil
 	}
 
-	res, _ := raw.(DataStore)
+	res, _ := raw.(Repository)
 	return res
 }
 
 // BootConfig is a struct which is for unmarshalled YAML
 type BootConfig struct {
-	DataStore struct {
+	Repository struct {
 		Enabled  bool   `yaml:"enabled" json:"enabled"`
 		Provider string `yaml:"provider" json:"provider"`
 		RootPath string `yaml:"rootPath" json:"rootPath"`
@@ -53,9 +53,9 @@ type BootConfig struct {
 	} `yaml:"datastore" json:"datastore"`
 }
 
-// RegisterDataStoreFromConfig is an implementation of:
+// RegisterRepositoryFromConfig is an implementation of:
 // type EntryRegFunc func(string) map[string]rkentry.Entry
-func RegisterDataStoreFromConfig(configFilePath string) map[string]rkentry.Entry {
+func RegisterRepositoryFromConfig(configFilePath string) map[string]rkentry.Entry {
 	res := make(map[string]rkentry.Entry)
 
 	// 1: decode config map into boot config struct
@@ -63,28 +63,31 @@ func RegisterDataStoreFromConfig(configFilePath string) map[string]rkentry.Entry
 	rkcommon.UnmarshalBootConfig(configFilePath, config)
 
 	// 3: construct entry
-	if config.DataStore.Enabled {
-		switch config.DataStore.Provider {
+	if config.Repository.Enabled {
+		switch config.Repository.Provider {
 		case "localFs":
-			store := RegisterLocalFs(
-				WithRootPathLocalFs(config.DataStore.RootPath))
-			res[store.GetName()] = store
+			repo := RegisterLocalFs(
+				WithRootPathLocalFs(config.Repository.RootPath))
+			res[repo.GetName()] = repo
 		case "mySql":
-			store := RegisterMySql(
-				WithUser(config.DataStore.MySql.User),
-				WithPass(config.DataStore.MySql.Pass),
-				WithProtocol(config.DataStore.MySql.Protocol),
-				WithAddr(config.DataStore.MySql.Addr),
-				WithDatabase(config.DataStore.MySql.Database),
-				WithParams(config.DataStore.MySql.Params))
-			res[store.GetName()] = store
+			repo := RegisterMySql(
+				WithUser(config.Repository.MySql.User),
+				WithPass(config.Repository.MySql.Pass),
+				WithProtocol(config.Repository.MySql.Protocol),
+				WithAddr(config.Repository.MySql.Addr),
+				WithDatabase(config.Repository.MySql.Database),
+				WithParams(config.Repository.MySql.Params))
+			res[repo.GetName()] = repo
+		default:
+			repo := RegisterMemory()
+			res[repo.GetName()] = repo
 		}
 	}
 
 	return res
 }
 
-type DataStore interface {
+type Repository interface {
 	rkentry.Entry
 
 	// Connect to to remote/local provider
@@ -98,36 +101,36 @@ type DataStore interface {
 	// ************************************************** //
 
 	// ListOrg as function name described
-	ListOrg() []*Organization
+	ListOrg() ([]*Org, error)
 
-	// InsertOrg as function name described
-	InsertOrg(org *Organization) bool
+	// CreateOrg as function name described
+	CreateOrg(org *Org) (bool, error)
 
 	// GetOrg as function name described
-	GetOrg(int) *Organization
+	GetOrg(int) (*Org, error)
 
 	// RemoveOrg as function name described
-	RemoveOrg(int) bool
+	RemoveOrg(int) (bool, error)
 
 	// UpdateOrg as function name described
-	UpdateOrg(org *Organization) bool
+	UpdateOrg(org *Org) (bool, error)
 
 	// ********************************************* //
 	// ************** Project related ************** //
 	// ********************************************* //
 
-	// ListProject as function name described
-	ListProject(int) []*Project
+	// ListProj as function name described
+	ListProj(int) ([]*Proj, error)
 
-	// InsertProject as function name described
-	InsertProject(proj *Project) bool
+	// CreateProj as function name described
+	CreateProj(proj *Proj) (bool, error)
 
-	// GetProject as function name described
-	GetProject(int, int) *Project
+	// GetProj as function name described
+	GetProj(int, int) (*Proj, error)
 
-	// RemoveProject as function name described
-	RemoveProject(int, int) bool
+	// RemoveProj as function name described
+	RemoveProj(int, int) (bool, error)
 
-	// UpdateProject as function name described
-	UpdateProject(org *Project) bool
+	// UpdateProj as function name described
+	UpdateProj(org *Proj) (bool, error)
 }

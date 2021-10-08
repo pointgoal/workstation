@@ -1,20 +1,25 @@
 package controller
 
-import "github.com/pointgoal/workstation/pkg/datastore"
+import "github.com/pointgoal/workstation/pkg/repository"
 
 // ************************************************** //
 // ************** Organization related ************** //
 // ************************************************** //
 
+// Org is model for API response
+type Org struct {
+	Meta    *repository.Org `yaml:"meta" json:"meta"`
+	ProjIds []int           `yaml:"projIds" json:"projIds"`
+}
+
 // ListOrgResponse response of list organization
 type ListOrgResponse struct {
-	OrgList []*datastore.Organization `yaml:"orgList" json:"orgList"`
+	OrgList []*Org `yaml:"orgList" json:"orgList"`
 }
 
 // GetOrgResponse response of get organization
 type GetOrgResponse struct {
-	Org        *datastore.Organization `yaml:"org" json:"org"`
-	ProjectIds []string                `yaml:"projectIds" json:"projectIds"`
+	Org *Org `yaml:"org" json:"org"`
 }
 
 // CreateOrgResponse response of create organization
@@ -41,37 +46,43 @@ type UpdateOrgRequest struct {
 // ************** Project related ************** //
 // ********************************************* //
 
-// ListProjectResponse response of list projects
-type ListProjectResponse struct {
-	ProjectList []*datastore.Project `yaml:"projectList" json:"projectList"`
+// Proj is model for API response
+type Proj struct {
+	Meta *repository.Proj `yaml:"meta" json:"meta"`
 }
 
-// GetProjectResponse response of get project
-type GetProjectResponse struct {
-	Project *datastore.Project `yaml:"project" json:"project"`
+// ListProjResponse response of list projects
+type ListProjResponse struct {
+	ProjList []*Proj `yaml:"projList" json:"projList"`
 }
 
-// CreateProjectResponse response of create project
-type CreateProjectResponse struct {
+// GetProjResponse response of get project
+type GetProjResponse struct {
+	Proj *Proj `yaml:"proj" json:"proj"`
+}
+
+// CreateProjResponse response of create project
+type CreateProjResponse struct {
+	OrgId  int `yaml:"orgId" json:"orgId"`
 	ProjId int `yaml:"projId" json:"projId"`
 }
 
-// CreateProjectRequest request body
-type CreateProjectRequest struct {
+// CreateProjRequest request body
+type CreateProjRequest struct {
 	Name string `yaml:"name" json:"name"`
 }
 
 // DeleteProjectResponse response of delete project
-type DeleteProjectResponse struct {
+type DeleteProjResponse struct {
 	Status bool `yaml:"status" json:"status"`
 }
 
-// UpdateProjectResponse response of update project
-type UpdateProjectResponse struct {
+// UpdateProjResponse response of update project
+type UpdateProjResponse struct {
 	Status bool `yaml:"status" json:"status"`
 }
 
-// UpdateProjectRequest request body
-type UpdateProjectRequest struct {
+// UpdateProjRequest request body
+type UpdateProjRequest struct {
 	Name string `yaml:"name" json:"name"`
 }

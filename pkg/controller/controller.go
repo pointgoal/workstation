@@ -8,7 +8,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"github.com/pointgoal/workstation/pkg/datastore"
+	"github.com/pointgoal/workstation/pkg/repository"
 	"github.com/rookie-ninja/rk-common/common"
 	"github.com/rookie-ninja/rk-entry/entry"
 	rkquery "github.com/rookie-ninja/rk-query"
@@ -65,7 +65,7 @@ func RegisterController(opts ...ControllerOption) *Controller {
 		EntryDescription: EntryDescription,
 		ZapLoggerEntry:   rkentry.GlobalAppCtx.GetZapLoggerEntryDefault(),
 		EventLoggerEntry: rkentry.GlobalAppCtx.GetEventLoggerEntryDefault(),
-		DS:               datastore.GetDataStore(),
+		Repo:             repository.GetRepository(),
 	}
 
 	for i := range opts {
@@ -87,7 +87,7 @@ type Controller struct {
 	EntryDescription string                    `json:"entryDescription" yaml:"entryDescription"`
 	ZapLoggerEntry   *rkentry.ZapLoggerEntry   `json:"zapLoggerEntry" yaml:"zapLoggerEntry"`
 	EventLoggerEntry *rkentry.EventLoggerEntry `json:"eventLoggerEntry" yaml:"eventLoggerEntry"`
-	DS               datastore.DataStore       `json:"dataStore" yaml:"dataStore"`
+	Repo             repository.Repository     `json:"repository" yaml:"repository"`
 }
 
 // Bootstrap entry
@@ -103,7 +103,7 @@ func (con *Controller) Bootstrap(context.Context) {
 	initApi()
 
 	// Get DB
-	con.DS = datastore.GetDataStore()
+	con.Repo = repository.GetRepository()
 
 	con.EventLoggerEntry.GetEventHelper().Finish(event)
 	logger.Info("Bootstrapping controller.", event.ListPayloads()...)
@@ -142,73 +142,6 @@ func (con *Controller) GetType() string {
 func (con *Controller) String() string {
 	bytes, _ := json.Marshal(con)
 	return string(bytes)
-}
-
-// ************************************************** //
-// ************** Organization related ************** //
-// ************************************************** //
-
-// ListOrg respond to GET v1/org
-func (con *Controller) ListOrg() []*datastore.Organization {
-	return con.DS.ListOrg()
-}
-
-// AddOrg respond  to PUT v1/org.
-func (con *Controller) AddOrg(name string) int {
-	org := datastore.NewOrganization(name)
-	if !con.DS.InsertOrg(org) {
-		return -1
-	}
-
-	return org.Id
-}
-
-// GetOrg respond to GET v1/org/<org-id>
-func (con *Controller) GetOrg(id int) *datastore.Organization {
-	return con.DS.GetOrg(id)
-}
-
-// DeleteOrg respond to DELETE v1/org/<org-id>
-func (con *Controller) DeleteOrg(id int) bool {
-	return con.DS.RemoveOrg(id)
-}
-
-// UpdateOrg respond to POST v1/org/<org-id>
-func (con *Controller) UpdateOrg(org *datastore.Organization) bool {
-	return con.DS.UpdateOrg(org)
-}
-
-// ********************************************* //
-// ************** Project related ************** //
-// ********************************************* //
-
-// ListProjects respond to GET v1/org/<org-id>/proj
-func (con *Controller) ListProject(orgId int) []*datastore.Project {
-	return con.DS.ListProject(orgId)
-}
-
-// GetProject respond to GET v1/org/<org-id>/proj/<proj-id>
-func (con *Controller) GetProject(orgId, projId int) *datastore.Project {
-	return con.DS.GetProject(orgId, projId)
-}
-
-// AddProject respond to PUT v1/org/<org-id>/proj
-func (con *Controller) AddProject(proj *datastore.Project) int {
-	if !con.DS.InsertProject(proj) {
-		return -1
-	}
-
-	return proj.Id
-}
-
-// DeleteProject respond to DELETE v1/org/<org-id>/proj/<proj-id>
-func (con *Controller) RemoveProject(orgId, projId int) bool {
-	return con.DS.RemoveProject(orgId, projId)
-}
-
-// UpdateProject respond to POST v1/org/<org-id>/proj/<proj-id>
-func (con *Controller) UpdateProject(proj *datastore.Project) bool {
-	return con.DS.UpdateProject(proj)
 }
 
 // GetController returns ProjectEntry.

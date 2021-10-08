@@ -26,7 +26,7 @@ gin:
         enabled: true
 controller:
   enabled: true
-datastore:
+repository:
   enabled: true
   provider: mySql
   mySql:

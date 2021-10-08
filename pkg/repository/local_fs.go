@@ -3,7 +3,7 @@
 // Use of this source code is governed by an Apache-style
 // license that can be found in the LICENSE file.
 
-package datastore
+package repository
 
 import (
 	"context"
@@ -148,15 +148,15 @@ func (l *LocalFs) Bootstrap(ctx context.Context) {
 
 	// Check healthy status of local file system
 	if !l.IsHealthy() {
-		rkcommon.ShutdownWithError(errors.New("dataStore is not healthy, shutting down"))
+		rkcommon.ShutdownWithError(errors.New("repository is not healthy, shutting down"))
 	}
 
 	// List organizations, projects and load the meta into maps
-	l.lastIndex[organizationKey] = l.maxOrgId()
-	l.lastIndex[projectKey] = l.maxProjId()
+	l.lastIndex[orgKey] = l.maxOrgId()
+	l.lastIndex[projKey] = l.maxProjId()
 
 	l.EventLoggerEntry.GetEventHelper().Finish(event)
-	logger.Info("Bootstrapping DataStore.", event.ListPayloads()...)
+	logger.Info("Bootstrapping repository.", event.ListPayloads()...)
 }
 
 // Interrupt will interrupt datastore
@@ -168,7 +168,7 @@ func (l *LocalFs) Interrupt(ctx context.Context) {
 	logger := l.ZapLoggerEntry.GetLogger().With(zap.String("eventId", event.GetEventId()))
 
 	l.EventLoggerEntry.GetEventHelper().Finish(event)
-	logger.Info("Interrupting DataStore.", event.ListPayloads()...)
+	logger.Info("Interrupting repository.", event.ListPayloads()...)
 }
 
 // GetName returns datastore entry name
@@ -201,8 +201,8 @@ func (l *LocalFs) String() string {
 // ************************************************** //
 
 // ListOrg as function name described
-func (l *LocalFs) ListOrg() []*Organization {
-	res := make([]*Organization, 0)
+func (l *LocalFs) ListOrg() ([]*Org, error) {
+	res := make([]*Org, 0)
 
 	// List folders
 	var fsInfos []fs.FileInfo
@@ -210,7 +210,7 @@ func (l *LocalFs) ListOrg() []*Organization {
 
 	if fsInfos, err = ioutil.ReadDir(path.Join(l.RootDir)); err != nil {
 		l.ZapLoggerEntry.GetLogger().Warn("Failed to list organizations", zap.Error(err))
-		return res
+		return res, err
 	}
 
 	for i := range fsInfos {
@@ -219,7 +219,7 @@ func (l *LocalFs) ListOrg() []*Organization {
 		}
 
 		// Unmarshal organization meta
-		org := &Organization{}
+		org := &Org{}
 		if err := l.readMetaFile(path.Join(l.RootDir, fsInfos[i].Name(), l.MetaFileName), org); err != nil {
 			continue
 		}
@@ -227,13 +227,13 @@ func (l *LocalFs) ListOrg() []*Organization {
 		res = append(res, org)
 	}
 
-	return res
+	return res, nil
 }
 
-// InsertOrg as function name described
-func (l *LocalFs) InsertOrg(org *Organization) bool {
+// CreateOrg as function name described
+func (l *LocalFs) CreateOrg(org *Org) (bool, error) {
 	if org == nil {
-		return false
+		return false, errors.New("nil organization")
 	}
 
 	l.assignRequiredFields(org)
@@ -242,68 +242,60 @@ func (l *LocalFs) InsertOrg(org *Organization) bool {
 	orgDir := path.Join(l.RootDir, strconv.Itoa(org.Id))
 	if err := os.Mkdir(orgDir, os.ModePerm); err != nil {
 		l.ZapLoggerEntry.GetLogger().Warn(fmt.Sprintf("Failed to create organization folder at %s", orgDir))
-		return false
+		return false, err
 	}
 
 	// 2: Write organization meta file
 	if err := l.writeToMetaFile(path.Join(l.RootDir, strconv.Itoa(org.Id), l.MetaFileName), org); err != nil {
-		return false
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
 // GetOrg as function name described
-func (l *LocalFs) GetOrg(orgId int) *Organization {
+func (l *LocalFs) GetOrg(orgId int) (*Org, error) {
 	// Read organization meta file and
-	org := &Organization{}
+	org := &Org{}
 	if err := l.readMetaFile(path.Join(l.RootDir, strconv.Itoa(orgId), l.MetaFileName), org); err != nil {
-		return nil
+		return nil, err
 	}
 
-	return org
+	return org, nil
 }
 
 // RemoveOrg as function name described
-func (l *LocalFs) RemoveOrg(orgId int) bool {
-	if v := l.GetOrg(orgId); v == nil {
-		return false
-	}
-
+func (l *LocalFs) RemoveOrg(orgId int) (bool, error) {
 	// 1: Remove organization folder
 	if err := os.RemoveAll(path.Join(l.RootDir, strconv.Itoa(orgId))); err != nil {
-		return false
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
 // UpdateOrg as function name described
-func (l *LocalFs) UpdateOrg(org *Organization) bool {
+func (l *LocalFs) UpdateOrg(org *Org) (bool, error) {
 	if org == nil {
-		return false
-	}
-
-	if v := l.GetOrg(org.Id); v == nil {
-		return false
+		return false, fmt.Errorf("organization is nil")
 	}
 
 	org.UpdatedAt = time.Now()
 	// 1: Read organization meta file
 	if err := l.writeToMetaFile(path.Join(l.RootDir, strconv.Itoa(org.Id), l.MetaFileName), org); err != nil {
-		return false
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
 // ********************************************* //
 // ************** Project related ************** //
 // ********************************************* //
 
-// ListProject as function name described
-func (l *LocalFs) ListProject(orgId int) []*Project {
-	res := make([]*Project, 0)
+// ListProj as function name described
+func (l *LocalFs) ListProj(orgId int) ([]*Proj, error) {
+	projList := make([]*Proj, 0)
 
 	// List folders
 	var fsInfos []fs.FileInfo
@@ -311,7 +303,7 @@ func (l *LocalFs) ListProject(orgId int) []*Project {
 
 	if fsInfos, err = ioutil.ReadDir(path.Join(l.RootDir, strconv.Itoa(orgId))); err != nil {
 		l.ZapLoggerEntry.GetLogger().Warn("Failed to list projects", zap.Error(err))
-		return res
+		return projList, err
 	}
 
 	for i := range fsInfos {
@@ -320,21 +312,21 @@ func (l *LocalFs) ListProject(orgId int) []*Project {
 		}
 
 		// Unmarshal project meta
-		proj := &Project{}
+		proj := &Proj{}
 		if err := l.readMetaFile(path.Join(l.RootDir, strconv.Itoa(orgId), fsInfos[i].Name(), l.MetaFileName), proj); err != nil {
 			continue
 		}
 
-		res = append(res, proj)
+		projList = append(projList, proj)
 	}
 
-	return res
+	return projList, nil
 }
 
-// InsertProject as function name described
-func (l *LocalFs) InsertProject(proj *Project) bool {
+// CreateProj as function name described
+func (l *LocalFs) CreateProj(proj *Proj) (bool, error) {
 	if proj == nil {
-		return false
+		return false, errors.New("project is nil")
 	}
 
 	l.assignRequiredFields(proj)
@@ -343,56 +335,59 @@ func (l *LocalFs) InsertProject(proj *Project) bool {
 	projDir := path.Join(l.RootDir, strconv.Itoa(proj.OrgId), strconv.Itoa(proj.Id))
 	if err := os.Mkdir(projDir, os.ModePerm); err != nil {
 		l.ZapLoggerEntry.GetLogger().Warn(fmt.Sprintf("Failed to create project folder at %s", projDir))
-		return false
+		return false, err
 	}
 
 	// 2: Write project meta file
 	if err := l.writeToMetaFile(path.Join(l.RootDir, strconv.Itoa(proj.OrgId), strconv.Itoa(proj.Id), l.MetaFileName), proj); err != nil {
-		return false
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
-// GetProject as function name described
-func (l *LocalFs) GetProject(orgId, projId int) *Project {
+// GetProj as function name described
+func (l *LocalFs) GetProj(orgId, projId int) (*Proj, error) {
 	// Read organization meta file and
-	proj := &Project{}
+	proj := &Proj{}
 	if err := l.readMetaFile(path.Join(l.RootDir, strconv.Itoa(orgId), strconv.Itoa(projId), l.MetaFileName), proj); err != nil {
-		return nil
+		return nil, err
 	}
 
-	return proj
+	return proj, nil
 }
 
-// RemoveProject as function name described
-func (l *LocalFs) RemoveProject(orgId, projId int) bool {
+// RemoveProj as function name described
+func (l *LocalFs) RemoveProj(orgId, projId int) (bool, error) {
 	// 1: Remove project folder
 	if err := os.RemoveAll(path.Join(l.RootDir, strconv.Itoa(orgId), strconv.Itoa(projId))); err != nil {
-		return false
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
-// UpdateProject as function name described
-func (l *LocalFs) UpdateProject(proj *Project) bool {
+// UpdateProj as function name described
+func (l *LocalFs) UpdateProj(proj *Proj) (bool, error) {
 	if proj == nil {
-		return false
+		return false, errors.New("nil project")
 	}
 
 	proj.UpdatedAt = time.Now()
 	// 1: Read organization meta file
 	if err := l.writeToMetaFile(path.Join(l.RootDir, strconv.Itoa(proj.OrgId), strconv.Itoa(proj.Id), l.MetaFileName), proj); err != nil {
-		return false
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
 // Get max ID of Organization
 func (l *LocalFs) maxOrgId() int {
-	orgList := l.ListOrg()
+	orgList, err := l.ListOrg()
+	if err != nil {
+		return -1
+	}
 
 	var res int
 
@@ -409,11 +404,18 @@ func (l *LocalFs) maxOrgId() int {
 func (l *LocalFs) maxProjId() int {
 	var res int
 
-	orgList := l.ListOrg()
+	orgList, err := l.ListOrg()
+	if err != nil {
+		return -1
+	}
 
 	for i := range orgList {
 		org := orgList[i]
-		projList := l.ListProject(org.Id)
+		projList, err := l.ListProj(org.Id)
+		if err != nil {
+			continue
+		}
+
 		for j := range projList {
 			if res < projList[j].Id {
 				res = projList[j].Id
@@ -427,16 +429,16 @@ func (l *LocalFs) maxProjId() int {
 // Assign required fields
 func (l *LocalFs) assignRequiredFields(in interface{}) {
 	switch v := in.(type) {
-	case *Organization:
-		id := l.lastIndex[organizationKey] + 1
-		l.lastIndex[organizationKey] = id
+	case *Org:
+		id := l.lastIndex[orgKey] + 1
+		l.lastIndex[orgKey] = id
 		v.Id = id
 		now := time.Now()
 		v.CreatedAt = now
 		v.UpdatedAt = now
-	case *Project:
-		id := l.lastIndex[projectKey] + 1
-		l.lastIndex[projectKey] = id
+	case *Proj:
+		id := l.lastIndex[projKey] + 1
+		l.lastIndex[projKey] = id
 		v.Id = id
 		now := time.Now()
 		v.CreatedAt = now

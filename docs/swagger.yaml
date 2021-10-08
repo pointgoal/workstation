@@ -4,13 +4,15 @@ definitions:
       orgId:
         type: integer
     type: object
-  controller.CreateProjectRequest:
+  controller.CreateProjRequest:
     properties:
       name:
         type: string
     type: object
-  controller.CreateProjectResponse:
+  controller.CreateProjResponse:
     properties:
+      orgId:
+        type: integer
       projId:
         type: integer
     type: object
@@ -19,7 +21,7 @@ definitions:
       status:
         type: boolean
     type: object
-  controller.DeleteProjectResponse:
+  controller.DeleteProjResponse:
     properties:
       status:
         type: boolean
@@ -27,30 +29,40 @@ definitions:
   controller.GetOrgResponse:
     properties:
       org:
-        $ref: '#/definitions/datastore.Organization'
-      projectIds:
-        items:
-          type: string
-        type: array
+        $ref: '#/definitions/controller.Org'
     type: object
-  controller.GetProjectResponse:
+  controller.GetProjResponse:
     properties:
-      project:
-        $ref: '#/definitions/datastore.Project'
+      proj:
+        $ref: '#/definitions/controller.Proj'
     type: object
   controller.ListOrgResponse:
     properties:
       orgList:
         items:
-          $ref: '#/definitions/datastore.Organization'
+          $ref: '#/definitions/controller.Org'
         type: array
     type: object
-  controller.ListProjectResponse:
+  controller.ListProjResponse:
     properties:
-      projectList:
+      projList:
         items:
-          $ref: '#/definitions/datastore.Project'
+          $ref: '#/definitions/controller.Proj'
         type: array
+    type: object
+  controller.Org:
+    properties:
+      meta:
+        $ref: '#/definitions/repository.Org'
+      projIds:
+        items:
+          type: integer
+        type: array
+    type: object
+  controller.Proj:
+    properties:
+      meta:
+        $ref: '#/definitions/repository.Proj'
     type: object
   controller.UpdateOrgRequest:
     properties:
@@ -62,17 +74,17 @@ definitions:
       status:
         type: boolean
     type: object
-  controller.UpdateProjectRequest:
+  controller.UpdateProjRequest:
     properties:
       name:
         type: string
     type: object
-  controller.UpdateProjectResponse:
+  controller.UpdateProjResponse:
     properties:
       status:
         type: boolean
     type: object
-  datastore.Organization:
+  repository.Org:
     properties:
       createdAt:
         type: string
@@ -83,7 +95,7 @@ definitions:
       updatedAt:
         type: string
     type: object
-  datastore.Project:
+  repository.Proj:
     properties:
       createdAt:
         type: string
@@ -144,7 +156,7 @@ paths:
       operationId: "4"
       parameters:
       - description: Organization Id
-        in: query
+        in: path
         name: orgId
         required: true
         type: integer
@@ -186,7 +198,7 @@ paths:
         schema:
           $ref: '#/definitions/controller.UpdateOrgRequest'
       - description: Organization Id
-        in: query
+        in: path
         name: orgId
         required: true
         type: integer
@@ -205,7 +217,7 @@ paths:
       operationId: "6"
       parameters:
       - description: Organization Id
-        in: query
+        in: path
         name: orgId
         required: true
         type: integer
@@ -215,7 +227,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.ListProjectResponse'
+            $ref: '#/definitions/controller.ListProjResponse'
       summary: List projects
       tags:
       - project
@@ -223,7 +235,7 @@ paths:
       operationId: "8"
       parameters:
       - description: Organization Id
-        in: query
+        in: path
         name: orgId
         required: true
         type: integer
@@ -232,14 +244,14 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/controller.CreateProjectRequest'
+          $ref: '#/definitions/controller.CreateProjRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.CreateProjectResponse'
+            $ref: '#/definitions/controller.CreateProjResponse'
       summary: create project
       tags:
       - project
@@ -248,12 +260,12 @@ paths:
       operationId: "9"
       parameters:
       - description: Organization Id
-        in: query
+        in: path
         name: orgId
         required: true
         type: integer
       - description: Project Id
-        in: query
+        in: path
         name: projId
         required: true
         type: integer
@@ -263,7 +275,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.DeleteProjectResponse'
+            $ref: '#/definitions/controller.DeleteProjResponse'
       summary: delete project
       tags:
       - project
@@ -271,12 +283,12 @@ paths:
       operationId: "7"
       parameters:
       - description: Organization Id
-        in: query
+        in: path
         name: orgId
         required: true
         type: integer
       - description: Project Id
-        in: query
+        in: path
         name: projId
         required: true
         type: integer
@@ -286,7 +298,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.GetProjectResponse'
+            $ref: '#/definitions/controller.GetProjResponse'
       summary: Get project
       tags:
       - project
@@ -294,12 +306,12 @@ paths:
       operationId: "10"
       parameters:
       - description: Organization Id
-        in: query
+        in: path
         name: orgId
         required: true
         type: integer
       - description: Project Id
-        in: query
+        in: path
         name: projId
         required: true
         type: integer
@@ -308,14 +320,14 @@ paths:
         name: project
         required: true
         schema:
-          $ref: '#/definitions/controller.UpdateProjectRequest'
+          $ref: '#/definitions/controller.UpdateProjRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controller.UpdateProjectResponse'
+            $ref: '#/definitions/controller.UpdateProjResponse'
       summary: update project
       tags:
       - project

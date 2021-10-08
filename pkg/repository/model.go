@@ -3,7 +3,7 @@
 // Use of this source code is governed by an Apache-style
 // license that can be found in the LICENSE file.
 
-package datastore
+package repository
 
 import (
 	"encoding/json"
@@ -13,14 +13,15 @@ import (
 )
 
 var (
-	organizationKey = Organization{}
-	projectKey      = Project{}
+	orgKey  = &Org{}
+	projKey = &Proj{}
 )
 
 // ************************************************ //
 // ************** Base model related ************** //
 // ************************************************ //
 
+// Base defines base model of gorm model
 type Base struct {
 	Id        int            `yaml:"id" json:"id" gorm:"primarykey"`
 	CreatedAt time.Time      `yaml:"createdAt" json:"createdAt"`
@@ -32,28 +33,29 @@ type Base struct {
 // ************** Organization related ************** //
 // ************************************************** //
 
-// Organization defines organizations in workstation.
-type Organization struct {
+// Org defines organizations in workstation.
+type Org struct {
 	Base
-	Name string `yaml:"name" json:"name"`
+	Name     string  `yaml:"name" json:"name"`
+	ProjList []*Proj `yaml:"-" json:"-"`
 }
 
-// NewOrganization create a new organization with name.
+// NewOrg create a new organization with name.
 // A new name will be assigned as the same as random Id if name is empty.
-func NewOrganization(name string) *Organization {
+func NewOrg(name string) *Org {
 	if len(name) < 1 {
 		name = utils.CreateId()
 	}
 
 	//now := time.Now()
-	return &Organization{
+	return &Org{
 		Name: name,
 	}
 }
 
 // Equal compares organization.
 // Why we need it? Because of time.Time
-func (org *Organization) Equal(in *Organization) bool {
+func (org *Org) Equal(in *Org) bool {
 	if in == nil {
 		return false
 	}
@@ -65,7 +67,7 @@ func (org *Organization) Equal(in *Organization) bool {
 }
 
 // String will marshal organization into json format.
-func (org *Organization) String() string {
+func (org *Org) String() string {
 	bytes, _ := json.Marshal(org)
 	return string(bytes)
 }
@@ -74,8 +76,8 @@ func (org *Organization) String() string {
 // ************** Project related ************** //
 // ********************************************* //
 
-// Project defines projects in workstation.
-type Project struct {
+// Proj defines projects in workstation.
+type Proj struct {
 	Base
 	OrgId int    `yaml:"orgId" json:"orgId" gorm:"index"`
 	Name  string `yaml:"name" json:"name" gorm:"index"`
@@ -83,26 +85,26 @@ type Project struct {
 
 // NewProject create a project with params.
 // A new name will be assigned with random Id if name is empty.
-func NewProject(orgId int, name string) *Project {
+func NewProj(orgId int, name string) *Proj {
 	if len(name) < 1 {
 		name = utils.CreateId()
 	}
 
-	return &Project{
+	return &Proj{
 		OrgId: orgId,
 		Name:  name,
 	}
 }
 
 // String will marshal organization into json format.
-func (proj *Project) String() string {
+func (proj *Proj) String() string {
 	bytes, _ := json.Marshal(proj)
 	return string(bytes)
 }
 
 // Equal compares project.
 // Why we need it? Because of time.Time
-func (proj *Project) Equal(in *Project) bool {
+func (proj *Proj) Equal(in *Proj) bool {
 	if in == nil {
 		return false
 	}

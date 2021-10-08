@@ -8,7 +8,7 @@ package main
 import (
 	"context"
 	"github.com/pointgoal/workstation/pkg/controller"
-	"github.com/pointgoal/workstation/pkg/datastore"
+	"github.com/pointgoal/workstation/pkg/repository"
 	"github.com/rookie-ninja/rk-boot"
 	"github.com/rookie-ninja/rk-entry/entry"
 )
@@ -16,7 +16,7 @@ import (
 // This must be declared in order to register registration function into rk context
 // otherwise, rk-boot won't able to bootstrap entry automatically from boot config file
 func init() {
-	rkentry.RegisterEntryRegFunc(datastore.RegisterDataStoreFromConfig)
+	rkentry.RegisterEntryRegFunc(repository.RegisterRepositoryFromConfig)
 	rkentry.RegisterEntryRegFunc(controller.RegisterControllerFromConfig)
 }
 

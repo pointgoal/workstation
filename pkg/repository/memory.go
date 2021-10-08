@@ -3,12 +3,13 @@
 // Use of this source code is governed by an Apache-style
 // license that can be found in the LICENSE file.
 
-package datastore
+package repository
 
 import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/rookie-ninja/rk-common/common"
 	"github.com/rookie-ninja/rk-entry/entry"
 	"github.com/rookie-ninja/rk-query"
@@ -24,8 +25,7 @@ func RegisterMemory() *Memory {
 		EntryDescription: "In memory",
 		ZapLoggerEntry:   rkentry.GlobalAppCtx.GetZapLoggerEntryDefault(),
 		EventLoggerEntry: rkentry.GlobalAppCtx.GetEventLoggerEntryDefault(),
-		orgMap:           make(map[int]*Organization, 0),
-		projectMap:       make(map[int]*Project, 0),
+		orgMap:           make(map[int]*Org, 0),
 		lastIndex:        make(map[interface{}]int, 0),
 	}
 
@@ -41,8 +41,7 @@ type Memory struct {
 	EntryDescription string                    `json:"entryDescription" yaml:"entryDescription"`
 	ZapLoggerEntry   *rkentry.ZapLoggerEntry   `json:"zapLoggerEntry" yaml:"zapLoggerEntry"`
 	EventLoggerEntry *rkentry.EventLoggerEntry `json:"eventLoggerEntry" yaml:"eventLoggerEntry"`
-	orgMap           map[int]*Organization     `json:"-" yaml:"-"`
-	projectMap       map[int]*Project          `json:"-" yaml:"-"`
+	orgMap           map[int]*Org              `json:"-" yaml:"-"`
 	lastIndex        map[interface{}]int       `json:"-" yaml:"-"`
 }
 
@@ -69,11 +68,11 @@ func (m *Memory) Bootstrap(ctx context.Context) {
 	}
 
 	// List organizations, projects and load the meta into maps
-	m.lastIndex[organizationKey] = m.maxOrgId()
-	m.lastIndex[projectKey] = m.maxProjId()
+	m.lastIndex[orgKey] = m.maxOrgId()
+	m.lastIndex[projKey] = m.maxProjId()
 
 	m.EventLoggerEntry.GetEventHelper().Finish(event)
-	logger.Info("Bootstrapping DataStore.", event.ListPayloads()...)
+	logger.Info("Bootstrapping repository.", event.ListPayloads()...)
 }
 
 // Interrupt will interrupt datastore
@@ -85,7 +84,7 @@ func (m *Memory) Interrupt(ctx context.Context) {
 	logger := m.ZapLoggerEntry.GetLogger().With(zap.String("eventId", event.GetEventId()))
 
 	m.EventLoggerEntry.GetEventHelper().Finish(event)
-	logger.Info("Interrupting DataStore.", event.ListPayloads()...)
+	logger.Info("Interrupting repository.", event.ListPayloads()...)
 }
 
 // GetName returns datastore entry name
@@ -118,124 +117,186 @@ func (m *Memory) String() string {
 // ************************************************** //
 
 // ListOrg as function name described
-func (m *Memory) ListOrg() []*Organization {
-	res := make([]*Organization, 0)
+func (m *Memory) ListOrg() ([]*Org, error) {
+	res := make([]*Org, 0)
 
 	for _, v := range m.orgMap {
 		res = append(res, v)
 	}
 
-	return res
+	return res, nil
 }
 
-// InsertOrg as function name described
-func (m *Memory) InsertOrg(org *Organization) bool {
+// CreateOrg as function name described
+func (m *Memory) CreateOrg(org *Org) (bool, error) {
 	if org == nil {
-		return false
+		return false, fmt.Errorf("nil organization")
 	}
 
 	m.assignRequiredFields(org)
 
 	m.orgMap[org.Id] = org
-	return true
+	return true, nil
 }
 
 // GetOrg as function name described
-func (m *Memory) GetOrg(orgId int) *Organization {
-	return m.orgMap[orgId]
+func (m *Memory) GetOrg(orgId int) (*Org, error) {
+	res, _ := m.orgMap[orgId]
+	return res, nil
 }
 
 // RemoveOrg as function name described
-func (m *Memory) RemoveOrg(orgId int) bool {
-	_, contains := m.orgMap[orgId]
+func (m *Memory) RemoveOrg(orgId int) (bool, error) {
+	org, contains := m.orgMap[orgId]
+
+	if !contains || org == nil {
+		return false, NewNotFoundf(OrgNotFoundMsg, orgId)
+	}
 
 	delete(m.orgMap, orgId)
 
-	return contains
+	return true, nil
 }
 
 // UpdateOrg as function name described
-func (m *Memory) UpdateOrg(org *Organization) bool {
+func (m *Memory) UpdateOrg(org *Org) (bool, error) {
 	if org == nil {
-		return false
+		return false, errors.New("nil organization")
 	}
 
-	if _, ok := m.orgMap[org.Id]; !ok {
-		return false
+	old, ok := m.orgMap[org.Id]
+	if !ok {
+		return false, NewNotFoundf(OrgNotFoundMsg, org.Id)
 	}
 
-	m.orgMap[org.Id] = org
+	old.Name = org.Name
+	old.UpdatedAt = time.Now()
 
-	return true
+	return true, nil
 }
 
 // ********************************************* //
 // ************** Project related ************** //
 // ********************************************* //
 
-// ListProject as function name described
-func (m *Memory) ListProject(orgId int) []*Project {
-	res := make([]*Project, 0)
+// ListProj as function name described
+func (m *Memory) ListProj(orgId int) ([]*Proj, error) {
+	res := make([]*Proj, 0)
 
-	for _, v := range m.projectMap {
-		if v.OrgId == orgId {
-			res = append(res, v)
-		}
+	org, ok := m.orgMap[orgId]
+	if !ok {
+		return res, NewNotFoundf(OrgNotFoundMsg, orgId)
 	}
 
-	return res
+	for i := range org.ProjList {
+		res = append(res, org.ProjList[i])
+	}
+
+	return res, nil
 }
 
-// InsertProject as function name described
-func (m *Memory) InsertProject(proj *Project) bool {
+// CreateProj as function name described
+func (m *Memory) CreateProj(proj *Proj) (bool, error) {
 	if proj == nil {
-		return false
+		return false, errors.New("nil project")
 	}
 
 	m.assignRequiredFields(proj)
 
-	org := m.orgMap[proj.OrgId]
-	if org == nil {
-		return false
+	org, ok := m.orgMap[proj.OrgId]
+	if !ok || org == nil {
+		return false, NewNotFoundf(OrgNotFoundMsg, proj.OrgId)
 	}
 
-	m.projectMap[proj.Id] = proj
-	return true
+	org.ProjList = append(org.ProjList, proj)
+
+	return true, nil
 }
 
-// GetProject as function name described
-func (m *Memory) GetProject(orgId, projId int) *Project {
-	return m.projectMap[projId]
+// GetProj as function name described
+func (m *Memory) GetProj(orgId, projId int) (*Proj, error) {
+	org, ok := m.orgMap[orgId]
+
+	if !ok || org == nil {
+		return nil, NewNotFoundf(OrgNotFoundMsg, orgId)
+	}
+
+	var res *Proj
+	for i := range org.ProjList {
+		proj := org.ProjList[i]
+		if proj.Id == projId {
+			res = proj
+			break
+		}
+	}
+
+	if res == nil {
+		return nil, NewNotFoundf(ProjNotFoundMsg, orgId, projId)
+	}
+
+	return res, nil
 }
 
-// RemoveProject as function name described
-func (m *Memory) RemoveProject(orgId int, projId int) bool {
-	org := m.orgMap[orgId]
-	if org == nil {
-		return false
+// RemoveProj as function name described
+func (m *Memory) RemoveProj(orgId int, projId int) (bool, error) {
+	org, ok := m.orgMap[orgId]
+	if !ok || org == nil {
+		return false, NewNotFoundf(OrgNotFoundMsg, orgId)
 	}
 
 	// Remove from proj list
-	delete(m.projectMap, projId)
-
-	return true
-}
-
-// UpdateProject as function name described
-func (m *Memory) UpdateProject(proj *Project) bool {
-	_, ok := m.projectMap[proj.Id]
-	if !ok {
-		return false
+	index := -1
+	for index = range org.ProjList {
+		proj := org.ProjList[index]
+		if proj.Id == projId {
+			break
+		}
 	}
 
-	m.projectMap[proj.Id] = proj
+	if index < 0 {
+		return false, NewNotFoundf(ProjNotFoundMsg, orgId, projId)
+	}
+	org.ProjList = append(org.ProjList[:index], org.ProjList[index+1:]...)
 
-	return true
+	return true, nil
+}
+
+// UpdateProj as function name described
+func (m *Memory) UpdateProj(proj *Proj) (bool, error) {
+	if proj == nil {
+		return false, fmt.Errorf("nil project")
+	}
+
+	org, ok := m.orgMap[proj.OrgId]
+	if !ok || org == nil {
+		return false, NewNotFoundf(OrgNotFoundMsg, proj.OrgId)
+	}
+
+	index := -1
+	for index = range org.ProjList {
+		e := org.ProjList[index]
+		if proj.Id == e.Id {
+			break
+		}
+	}
+
+	if index < 0 {
+		return false, NewNotFoundf(ProjNotFoundMsg, proj.OrgId, proj.Id)
+	}
+
+	org.ProjList[index].Name = proj.Name
+	org.ProjList[index].UpdatedAt = time.Now()
+
+	return true, nil
 }
 
 // Get max ID of Organization
 func (m *Memory) maxOrgId() int {
-	orgList := m.ListOrg()
+	orgList, err := m.ListOrg()
+
+	if err != nil {
+		return -1
+	}
 
 	var res int
 
@@ -252,11 +313,18 @@ func (m *Memory) maxOrgId() int {
 func (m *Memory) maxProjId() int {
 	var res int
 
-	orgList := m.ListOrg()
+	orgList, err := m.ListOrg()
+	if err != nil {
+		return -1
+	}
 
 	for i := range orgList {
 		org := orgList[i]
-		projList := m.ListProject(org.Id)
+		projList, err := m.ListProj(org.Id)
+		if err != nil {
+			continue
+		}
+
 		for j := range projList {
 			if res < projList[j].Id {
 				res = projList[j].Id
@@ -270,16 +338,16 @@ func (m *Memory) maxProjId() int {
 // Assign required fields
 func (m *Memory) assignRequiredFields(in interface{}) {
 	switch v := in.(type) {
-	case *Organization:
-		id := m.lastIndex[organizationKey] + 1
-		m.lastIndex[organizationKey] = id
+	case *Org:
+		id := m.lastIndex[orgKey] + 1
+		m.lastIndex[orgKey] = id
 		v.Id = id
 		now := time.Now()
 		v.CreatedAt = now
 		v.UpdatedAt = now
-	case *Project:
-		id := m.lastIndex[projectKey] + 1
-		m.lastIndex[projectKey] = id
+	case *Proj:
+		id := m.lastIndex[projKey] + 1
+		m.lastIndex[projKey] = id
 		v.Id = id
 		now := time.Now()
 		v.CreatedAt = now

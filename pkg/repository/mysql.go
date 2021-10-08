@@ -3,18 +3,19 @@
 // Use of this source code is governed by an Apache-style
 // license that can be found in the LICENSE file.
 
-package datastore
+package repository
 
 import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
-	rkcommon "github.com/rookie-ninja/rk-common/common"
+	"github.com/rookie-ninja/rk-common/common"
 	"github.com/rookie-ninja/rk-entry/entry"
-	rkquery "github.com/rookie-ninja/rk-query"
+	"github.com/rookie-ninja/rk-query"
 	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -132,9 +133,10 @@ type MySql struct {
 	database         string                    `yaml:"database" json:"database"`
 	params           []string                  `yaml:"params" json:"params"`
 	db               *gorm.DB                  `yaml:"-" json:"-"`
-	enableMockDb     bool                      `yaml:"-" json:"-"`
-	sqlMock          sqlmock.Sqlmock           `yaml:"-" json:"-"`
-	nowFunc          func() time.Time          `yaml:"-" json:"-"`
+	// For unit test
+	enableMockDb bool             `yaml:"-" json:"-"`
+	sqlMock      sqlmock.Sqlmock  `yaml:"-" json:"-"`
+	nowFunc      func() time.Time `yaml:"-" json:"-"`
 }
 
 // Create database if missing
@@ -257,11 +259,11 @@ func (m *MySql) Bootstrap(ctx context.Context) {
 			m.user, "****", m.protocol, m.addr, m.database))
 	}
 
-	m.db.AutoMigrate(&Organization{})
-	m.db.AutoMigrate(&Project{})
+	m.db.AutoMigrate(&Org{})
+	m.db.AutoMigrate(&Proj{})
 
 	m.EventLoggerEntry.GetEventHelper().Finish(event)
-	logger.Info("Bootstrapping DataStore.", event.ListPayloads()...)
+	logger.Info("Bootstrapping repository.", event.ListPayloads()...)
 }
 
 // Interrupt will interrupt datastore
@@ -273,7 +275,7 @@ func (m *MySql) Interrupt(ctx context.Context) {
 	logger := m.ZapLoggerEntry.GetLogger().With(zap.String("eventId", event.GetEventId()))
 
 	m.EventLoggerEntry.GetEventHelper().Finish(event)
-	logger.Info("Interrupting DataStore.", event.ListPayloads()...)
+	logger.Info("Interrupting repository.", event.ListPayloads()...)
 }
 
 // GetName returns datastore entry name
@@ -306,174 +308,169 @@ func (m *MySql) String() string {
 // ************************************************** //
 
 // ListOrg as function name described
-func (m *MySql) ListOrg() []*Organization {
-	orgList := make([]*Organization, 0)
+func (m *MySql) ListOrg() ([]*Org, error) {
+	orgList := make([]*Org, 0)
 	res := m.db.Find(&orgList)
 
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to list organizations from DB", zap.Error(res.Error))
-		return make([]*Organization, 0)
+		return orgList, res.Error
 	}
 
-	return orgList
+	return orgList, nil
 }
 
-// InsertOrg as function name described
-func (m *MySql) InsertOrg(org *Organization) bool {
+// CreateOrg as function name described
+func (m *MySql) CreateOrg(org *Org) (bool, error) {
 	if org == nil {
-		return false
+		return false, errors.New("nil organization")
 	}
 
 	res := m.db.Create(org)
 	if res.Error != nil {
-		m.ZapLoggerEntry.GetLogger().Warn("failed to insert organizations to DB", zap.Error(res.Error))
-		return false
+		m.ZapLoggerEntry.GetLogger().Warn("failed to create organizations in DB", zap.Error(res.Error))
+		return false, res.Error
 	}
 
-	return true
+	if res.RowsAffected < 1 {
+		return false, fmt.Errorf("failed to create organization with name:%s", org.Name)
+	}
+
+	return true, nil
 }
 
 // GetOrg as function name described
-func (m *MySql) GetOrg(orgId int) *Organization {
-	org := &Organization{}
+func (m *MySql) GetOrg(orgId int) (*Org, error) {
+	org := &Org{}
 	res := m.db.Where("id = ?", orgId).Find(org)
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to get organizations from DB", zap.Error(res.Error))
-		return nil
+		return nil, res.Error
 	}
 
 	if res.RowsAffected < 1 {
-		return nil
+		return nil, NewNotFoundf(OrgNotFoundMsg, orgId)
 	}
 
-	return org
+	return org, nil
 }
 
 // RemoveOrg as function name described
-func (m *MySql) RemoveOrg(orgId int) bool {
-	res := m.db.Delete(&Organization{}, orgId)
+func (m *MySql) RemoveOrg(orgId int) (bool, error) {
+	res := m.db.Delete(&Org{}, orgId)
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to delete organizations from DB", zap.Error(res.Error))
-		return false
+		return false, res.Error
 	}
 
 	if res.RowsAffected < 1 {
-		return false
+		return false, NewNotFoundf(OrgNotFoundMsg, orgId)
 	}
 
-	// delete projects
-	projects := m.ListProject(orgId)
-	for i := range projects {
-		m.RemoveProject(orgId, projects[i].Id)
-	}
-
-	return true
+	return true, nil
 }
 
 // UpdateOrg as function name described
-func (m *MySql) UpdateOrg(org *Organization) bool {
+func (m *MySql) UpdateOrg(org *Org) (bool, error) {
 	if org == nil {
-		return false
+		return false, errors.New("nil organization")
 	}
 
 	res := m.db.Save(org)
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to update organizations to DB", zap.Error(res.Error))
-		return false
+		return false, res.Error
 	}
 
 	if res.RowsAffected < 1 {
-		return false
+		return false, NewNotFoundf(OrgNotFoundMsg, org.Id)
 	}
 
-	return true
+	return true, nil
 }
 
 // ********************************************* //
 // ************** Project related ************** //
 // ********************************************* //
 
-// ListProject as function name described
-func (m *MySql) ListProject(orgId int) []*Project {
-	projList := make([]*Project, 0)
+// ListProj as function name described
+func (m *MySql) ListProj(orgId int) ([]*Proj, error) {
+	projList := make([]*Proj, 0)
+
 	res := m.db.Where("org_id = ?", orgId).Find(&projList)
 
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to list projects from DB", zap.Error(res.Error))
+		return projList, res.Error
 	}
-
-	return projList
+	return projList, nil
 }
 
-// InsertProject as function name described
-func (m *MySql) InsertProject(proj *Project) bool {
+// CreateProj as function name described
+func (m *MySql) CreateProj(proj *Proj) (bool, error) {
 	if proj == nil {
-		return false
-	}
-
-	if org := m.GetOrg(proj.OrgId); org == nil {
-		return false
+		return false, errors.New("nil project")
 	}
 
 	res := m.db.Where("org_id = ?", proj.OrgId).Create(proj)
 	if res.Error != nil {
-		m.ZapLoggerEntry.GetLogger().Warn("failed to insert project to DB", zap.Error(res.Error))
-		return false
+		m.ZapLoggerEntry.GetLogger().Warn("failed to insert project", zap.Error(res.Error))
+		return false, res.Error
 	}
 
-	return true
+	if res.RowsAffected < 1 {
+		return false, fmt.Errorf("failed to create project with orgId:%d id:%d", proj.OrgId, proj.Id)
+	}
+
+	return true, nil
 }
 
-// GetProject as function name described
-func (m *MySql) GetProject(orgId, projId int) *Project {
-	proj := &Project{}
+// GetProj as function name described
+func (m *MySql) GetProj(orgId, projId int) (*Proj, error) {
+	proj := &Proj{}
 	res := m.db.Where("org_id = ? AND id = ?", orgId, projId).Find(proj)
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to get project from DB", zap.Error(res.Error))
-		return nil
+		return nil, res.Error
 	}
 
 	if res.RowsAffected < 1 {
-		return nil
+		return nil, NewNotFoundf(ProjNotFoundMsg, orgId, projId)
 	}
 
-	return proj
+	return proj, nil
 }
 
-// RemoveProject as function name described
-func (m *MySql) RemoveProject(orgId, projId int) bool {
-	res := m.db.Where("org_id = ?", orgId).Delete(&Project{}, projId)
+// RemoveProj as function name described
+func (m *MySql) RemoveProj(orgId, projId int) (bool, error) {
+	res := m.db.Where("org_id = ?", orgId).Delete(&Proj{}, projId)
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to delete project from DB", zap.Error(res.Error))
-		return false
+		return false, res.Error
 	}
 
 	if res.RowsAffected < 1 {
-		return false
+		return false, NewNotFoundf(ProjNotFoundMsg, orgId, projId)
 	}
 
-	return true
+	return true, nil
 }
 
-// UpdateProject as function name described
-func (m *MySql) UpdateProject(proj *Project) bool {
+// UpdateProj as function name described
+func (m *MySql) UpdateProj(proj *Proj) (bool, error) {
 	if proj == nil {
-		return false
-	}
-
-	if org := m.GetOrg(proj.OrgId); org == nil {
-		return false
+		return false, errors.New("nil project")
 	}
 
 	res := m.db.Save(proj)
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to update project to DB", zap.Error(res.Error))
-		return false
+		return false, res.Error
 	}
 
 	if res.RowsAffected < 1 {
-		return false
+		return false, NewNotFoundf(ProjNotFoundMsg, proj.OrgId, proj.Id)
 	}
 
-	return true
+	return true, nil
 }
