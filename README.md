@@ -3,6 +3,11 @@
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
 - [workstation](#workstation)
+  - [Quick start](#quick-start)
+  - [Backend repository](#backend-repository)
+    - [MySql](#mysql)
+    - [local](#local)
+    - [memory](#memory)
   - [API](#api)
     - [Organizations](#organizations)
       - [List organizations](#list-organizations)
@@ -26,6 +31,62 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Workstation backend.
+
+## Quick start
+Start workstation by running bellow command or right click main.go file on your IDE.
+```shell script
+$ go run main.go
+```
+
+## Backend repository
+Currently, we support three types of repository which are localFs, memory and MySql.
+
+### MySql
+Configure workstation to use mysql as backend repository
+
+- boot.yaml
+```yaml
+---
+...
+repository:
+  enabled: true
+  provider: mySql
+  mySql:
+    user: root
+    pass: pass
+    protocol: tcp
+    addr: localhost:3306
+    params:
+      - "charset=utf8mb4"
+      - "parseTime=True"
+      - "loc=Local"
+```
+
+### local
+Configure workstation to use local file system as backend repository
+
+- boot.yaml
+```yaml
+---
+...
+repository:
+  enabled: true
+  provider: local
+  local:
+    dataDir: /Users/dongxuny/workspace/workstation/workstation/tmp
+```
+
+### memory
+Configure workstation to use local memory as backend repository
+
+- boot.yaml
+```yaml
+---
+...
+repository:
+  enabled: true
+  provider: memory
+```
 
 ## API
 ### Organizations

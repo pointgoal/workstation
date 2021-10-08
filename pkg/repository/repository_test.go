@@ -45,7 +45,7 @@ func TestGetDataStore(t *testing.T) {
 	bootConfigStr := `
 repository:
   enabled: true
-  provider: localFs
+  provider: local
 `
 
 	tempDir := path.Join(t.TempDir(), "boot.yaml")

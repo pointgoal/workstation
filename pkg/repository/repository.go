@@ -30,7 +30,6 @@ type BootConfig struct {
 	Repository struct {
 		Enabled  bool   `yaml:"enabled" json:"enabled"`
 		Provider string `yaml:"provider" json:"provider"`
-		RootPath string `yaml:"rootPath" json:"rootPath"`
 		Local    struct {
 			DataDir string `yaml:"dataDir" json:"dataDir"`
 		} `yaml:"local" json:"local"`
@@ -65,9 +64,9 @@ func RegisterRepositoryFromConfig(configFilePath string) map[string]rkentry.Entr
 	// 3: construct entry
 	if config.Repository.Enabled {
 		switch config.Repository.Provider {
-		case "localFs":
+		case "local":
 			repo := RegisterLocalFs(
-				WithRootPathLocalFs(config.Repository.RootPath))
+				WithRootPathLocalFs(config.Repository.Local.DataDir))
 			res[repo.GetName()] = repo
 		case "mySql":
 			repo := RegisterMySql(
