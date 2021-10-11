@@ -28,17 +28,14 @@ controller:
   enabled: true
 repository:
   enabled: true
-  provider: memory
-#  provider: local
-#  local:
-#    dataDir: /Users/dongxuny/workspace/workstation/workstation/tmp
-#  provider: mySql
-#  mySql:
-#    user: root
-#    pass: pass
-#    protocol: tcp
-#    addr: localhost:3306
-#    params:
-#      - "charset=utf8mb4"
-#      - "parseTime=True"
-#      - "loc=Local"
+#  provider: memory
+  provider: mySql
+  mySql:
+    user: root
+    pass: pass
+    protocol: tcp
+    addr: localhost:3306
+    params:
+      - "charset=utf8mb4"
+      - "parseTime=True"
+      - "loc=Local"

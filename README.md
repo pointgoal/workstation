@@ -6,7 +6,6 @@
   - [Quick start](#quick-start)
   - [Backend repository](#backend-repository)
     - [MySql](#mysql)
-    - [local](#local)
     - [memory](#memory)
   - [API](#api)
     - [Organizations](#organizations)
@@ -39,7 +38,7 @@ $ go run main.go
 ```
 
 ## Backend repository
-Currently, we support three types of repository which are localFs, memory and MySql.
+Currently, we support three types of repository which are memory and MySql.
 
 ### MySql
 Configure workstation to use mysql as backend repository
@@ -60,20 +59,6 @@ repository:
       - "charset=utf8mb4"
       - "parseTime=True"
       - "loc=Local"
-```
-
-### local
-Configure workstation to use local file system as backend repository
-
-- boot.yaml
-```yaml
----
-...
-repository:
-  enabled: true
-  provider: local
-  local:
-    dataDir: /Users/dongxuny/workspace/workstation/workstation/tmp
 ```
 
 ### memory
@@ -174,11 +159,11 @@ $ curl -X DELETE "http://localhost:8080/v1/org/4"
 ### Projects
 | API | Description |
 | --- | --- |
-| GET /v1/org/{orgId}/proj | List projects |
-| PUT /v1/org/{orgId}/proj | Create project |
-| GET /v1/org/{orgId}/proj/{projId} | Get project |
-| POST /v1/org/{orgId}/proj/{projId} | Update project |
-| DELETE /v1/org/{orgId}/proj/{projId} | Delete project |
+| GET /v1/proj?ordId=? | List projects |
+| PUT /v1/proj | Create project |
+| GET /v1/proj/{projId}?ordId=? | Get project |
+| POST /v1/proj/{projId} | Update project |
+| DELETE /v1/proj/{projId} | Delete project |
 
 #### List projects
 ```shell script
@@ -209,7 +194,7 @@ $ curl -X GET "http://localhost:8080/v1/org/1/proj"
 
 #### Create project
 ```shell script
-$ curl -X PUT "http://localhost:8080/v1/org/3/proj" -d "{  \"name\": \"my-proj-4\"}"
+$ curl -X PUT "http://localhost:8080/v1/proj?ordId=3" -d "{  \"name\": \"my-proj-4\"}"
 {
   "orgId": 3,
   "projId": 3
@@ -218,7 +203,7 @@ $ curl -X PUT "http://localhost:8080/v1/org/3/proj" -d "{  \"name\": \"my-proj-4
 
 #### Get project
 ```shell script
-$ curl -X GET "http://localhost:8080/v1/org/3/proj/3"
+$ curl -X GET "http://localhost:8080/v1/proj/3"
 {
   "proj": {
     "meta": {
@@ -234,7 +219,7 @@ $ curl -X GET "http://localhost:8080/v1/org/3/proj/3"
 
 #### Update project
 ```shell script
-$ curl -X POST "http://localhost:8080/v1/org/3/proj/3" -d "{  \"name\": \"my-new-proj\"}"
+$ curl -X POST "http://localhost:8080/v1/proj/3" -d "{  \"name\": \"my-new-proj\"}"
 {
   "status": true
 }
@@ -242,7 +227,7 @@ $ curl -X POST "http://localhost:8080/v1/org/3/proj/3" -d "{  \"name\": \"my-new
 
 #### Delete project
 ```shell script
-$ curl -X DELETE "http://localhost:8080/v1/org/3/proj/3"
+$ curl -X DELETE "http://localhost:8080/v1/proj/3"
 {
   "status": true
 }

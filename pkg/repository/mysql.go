@@ -397,7 +397,12 @@ func (m *MySql) UpdateOrg(org *Org) (bool, error) {
 func (m *MySql) ListProj(orgId int) ([]*Proj, error) {
 	projList := make([]*Proj, 0)
 
-	res := m.db.Where("org_id = ?", orgId).Find(&projList)
+	var res *gorm.DB
+	if orgId < 0 {
+		res = m.db.Find(&projList)
+	} else {
+		res = m.db.Where("org_id = ?", orgId).Find(&projList)
+	}
 
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to list projects from DB", zap.Error(res.Error))
@@ -426,31 +431,31 @@ func (m *MySql) CreateProj(proj *Proj) (bool, error) {
 }
 
 // GetProj as function name described
-func (m *MySql) GetProj(orgId, projId int) (*Proj, error) {
+func (m *MySql) GetProj(projId int) (*Proj, error) {
 	proj := &Proj{}
-	res := m.db.Where("org_id = ? AND id = ?", orgId, projId).Find(proj)
+	res := m.db.Where("id = ?", projId).Find(proj)
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to get project from DB", zap.Error(res.Error))
 		return nil, res.Error
 	}
 
 	if res.RowsAffected < 1 {
-		return nil, NewNotFoundf(ProjNotFoundMsg, orgId, projId)
+		return nil, NewNotFoundf(ProjNotFoundMsg, projId)
 	}
 
 	return proj, nil
 }
 
 // RemoveProj as function name described
-func (m *MySql) RemoveProj(orgId, projId int) (bool, error) {
-	res := m.db.Where("org_id = ?", orgId).Delete(&Proj{}, projId)
+func (m *MySql) RemoveProj(projId int) (bool, error) {
+	res := m.db.Delete(&Proj{}, projId)
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to delete project from DB", zap.Error(res.Error))
 		return false, res.Error
 	}
 
 	if res.RowsAffected < 1 {
-		return false, NewNotFoundf(ProjNotFoundMsg, orgId, projId)
+		return false, NewNotFoundf(ProjNotFoundMsg, projId)
 	}
 
 	return true, nil
@@ -469,7 +474,7 @@ func (m *MySql) UpdateProj(proj *Proj) (bool, error) {
 	}
 
 	if res.RowsAffected < 1 {
-		return false, NewNotFoundf(ProjNotFoundMsg, proj.OrgId, proj.Id)
+		return false, NewNotFoundf(ProjNotFoundMsg, proj.Id)
 	}
 
 	return true, nil

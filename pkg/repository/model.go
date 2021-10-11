@@ -115,3 +115,27 @@ func (proj *Proj) Equal(in *Proj) bool {
 		proj.CreatedAt.Equal(in.CreatedAt) &&
 		proj.UpdatedAt.Equal(in.UpdatedAt)
 }
+
+// ******************************************** //
+// ************** Source related ************** //
+// ******************************************** //
+
+type Source struct {
+	Base
+	OrgId  int     `yaml:"orgId" json:"orgId" gorm:"index"`
+	ProjId int     `yaml:"projId" json:"projId" gorm:"index"`
+	Type   string  `yaml:"type" json:"type" gorm:"index"`
+	Github *Github `yaml:"github" json:"github"`
+	Local  *Local  `yaml:"local" json:"local"`
+}
+
+type Github struct {
+	Base
+	Repository  string `yaml:"repository" json:"repository"`
+	AccessToken string `yaml:"accessToken" json:"accessToken"`
+}
+
+type Local struct {
+	Base
+	FullPath string `yaml:"fullPath" json:"fullPath"`
+}

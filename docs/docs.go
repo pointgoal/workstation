@@ -32,6 +32,44 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/v1//proj/{projId}": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project"
+                ],
+                "summary": "update project",
+                "operationId": "10",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project Id",
+                        "name": "projId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Project",
+                        "name": "project",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateProjRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateProjResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/org": {
             "get": {
                 "produces": [
@@ -171,7 +209,7 @@ var doc = `{
                 }
             }
         },
-        "/v1/org/{orgId}/proj": {
+        "/v1/proj": {
             "get": {
                 "produces": [
                     "application/json"
@@ -186,8 +224,7 @@ var doc = `{
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "path",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -213,7 +250,7 @@ var doc = `{
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -236,7 +273,7 @@ var doc = `{
                 }
             }
         },
-        "/v1/org/{orgId}/proj/{projId}": {
+        "/v1/proj/{projId}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -247,13 +284,6 @@ var doc = `{
                 "summary": "Get project",
                 "operationId": "7",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Project Id",
@@ -271,49 +301,6 @@ var doc = `{
                     }
                 }
             },
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project"
-                ],
-                "summary": "update project",
-                "operationId": "10",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Project Id",
-                        "name": "projId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Project",
-                        "name": "project",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.UpdateProjRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controller.UpdateProjResponse"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "produces": [
                     "application/json"
@@ -324,13 +311,6 @@ var doc = `{
                 "summary": "delete project",
                 "operationId": "9",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Project Id",

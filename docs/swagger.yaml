@@ -120,6 +120,31 @@ info:
   title: Workstation
   version: "1.0"
 paths:
+  /v1//proj/{projId}:
+    post:
+      operationId: "10"
+      parameters:
+      - description: Project Id
+        in: path
+        name: projId
+        required: true
+        type: integer
+      - description: Project
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UpdateProjRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.UpdateProjResponse'
+      summary: update project
+      tags:
+      - project
   /v1/org:
     get:
       operationId: "1"
@@ -212,14 +237,13 @@ paths:
       summary: Update organization
       tags:
       - organization
-  /v1/org/{orgId}/proj:
+  /v1/proj:
     get:
       operationId: "6"
       parameters:
       - description: Organization Id
-        in: path
+        in: query
         name: orgId
-        required: true
         type: integer
       produces:
       - application/json
@@ -235,7 +259,7 @@ paths:
       operationId: "8"
       parameters:
       - description: Organization Id
-        in: path
+        in: query
         name: orgId
         required: true
         type: integer
@@ -255,15 +279,10 @@ paths:
       summary: create project
       tags:
       - project
-  /v1/org/{orgId}/proj/{projId}:
+  /v1/proj/{projId}:
     delete:
       operationId: "9"
       parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: integer
       - description: Project Id
         in: path
         name: projId
@@ -282,11 +301,6 @@ paths:
     get:
       operationId: "7"
       parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: integer
       - description: Project Id
         in: path
         name: projId
@@ -300,35 +314,6 @@ paths:
           schema:
             $ref: '#/definitions/controller.GetProjResponse'
       summary: Get project
-      tags:
-      - project
-    post:
-      operationId: "10"
-      parameters:
-      - description: Organization Id
-        in: path
-        name: orgId
-        required: true
-        type: integer
-      - description: Project Id
-        in: path
-        name: projId
-        required: true
-        type: integer
-      - description: Project
-        in: body
-        name: project
-        required: true
-        schema:
-          $ref: '#/definitions/controller.UpdateProjRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controller.UpdateProjResponse'
-      summary: update project
       tags:
       - project
 swagger: "2.0"

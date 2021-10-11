@@ -122,7 +122,7 @@ func TestMemory_Project_Operations(t *testing.T) {
 	assert.Nil(t, err)
 
 	// remove proj
-	succ, err = repo.RemoveProj(proj.OrgId, proj.Id)
+	succ, err = repo.RemoveProj(proj.Id)
 	assert.True(t, succ)
 	assert.Nil(t, err)
 }

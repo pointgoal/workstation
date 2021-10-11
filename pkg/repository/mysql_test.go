@@ -262,7 +262,7 @@ func TestMySql_CreateProj(t *testing.T) {
 }
 
 func TestMySql_GetProj(t *testing.T) {
-	query := regexp.QuoteMeta("SELECT * FROM `projs` WHERE (org_id = ? AND id = ?) AND `projs`.`deleted_at` IS NULL")
+	query := regexp.QuoteMeta("SELECT * FROM `projs` WHERE id = ? AND `projs`.`deleted_at` IS NULL")
 
 	// 1: init repo as MySQL
 	repo := RegisterMySql(WithEnableMockDb())
@@ -270,10 +270,10 @@ func TestMySql_GetProj(t *testing.T) {
 
 	// 2: happy case
 	repo.sqlMock.ExpectQuery(query).
-		WithArgs(1, 1).
+		WithArgs(1).
 		WillReturnRows(repo.sqlMock.NewRows([]string{"id", "org_id", "created_at", "updated_at", "deleted_at", "name"}).
 			AddRow(1, 1, time.Now(), time.Now(), nil, "ut-proj"))
-	proj, err := repo.GetProj(1, 1)
+	proj, err := repo.GetProj(1)
 	assert.NotNil(t, proj)
 	assert.Nil(t, err)
 
@@ -281,13 +281,13 @@ func TestMySql_GetProj(t *testing.T) {
 	repo.sqlMock.ExpectQuery(query).
 		WithArgs(proj.OrgId, proj.Id).
 		WillReturnError(errors.New("ut-error"))
-	proj, err = repo.GetProj(1, 1)
+	proj, err = repo.GetProj(1)
 	assert.Nil(t, proj)
 	assert.NotNil(t, err)
 }
 
 func TestMySql_RemoveProj(t *testing.T) {
-	query := regexp.QuoteMeta("UPDATE `projs` SET `deleted_at`=? WHERE (org_id = ?) AND `projs`.`id` = ? AND `projs`.`deleted_at` IS NULL")
+	query := regexp.QuoteMeta("UPDATE `projs` SET `deleted_at`=? WHERE `projs`.`id` = ? AND `projs`.`deleted_at` IS NULL")
 
 	// 1: init now function for unit test
 	now := time.Now()
@@ -304,30 +304,30 @@ func TestMySql_RemoveProj(t *testing.T) {
 	// 3: happy case
 	repo.sqlMock.ExpectBegin()
 	repo.sqlMock.ExpectExec(query).
-		WithArgs(now, 1, 1).
+		WithArgs(now, 1).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	repo.sqlMock.ExpectCommit()
-	succ, err := repo.RemoveProj(1, 1)
+	succ, err := repo.RemoveProj(1)
 	assert.True(t, succ)
 	assert.Nil(t, err)
 
 	// 4: without result
 	repo.sqlMock.ExpectBegin()
 	repo.sqlMock.ExpectExec(query).
-		WithArgs(now, 1, 1).
+		WithArgs(now, 1).
 		WillReturnResult(sqlmock.NewResult(1, 0))
 	repo.sqlMock.ExpectCommit()
-	succ, err = repo.RemoveProj(1, 1)
+	succ, err = repo.RemoveProj(1)
 	assert.False(t, succ)
 	assert.NotNil(t, err)
 
 	// 5: with error
 	repo.sqlMock.ExpectBegin()
 	repo.sqlMock.ExpectExec(query).
-		WithArgs(now, 1, 1).
+		WithArgs(now, 1).
 		WillReturnError(errors.New("ut-error"))
 	repo.sqlMock.ExpectRollback()
-	succ, err = repo.RemoveProj(1, 1)
+	succ, err = repo.RemoveProj(1)
 	assert.False(t, succ)
 	assert.NotNil(t, err)
 }
@@ -418,4 +418,24 @@ func TestMySql_EntryFunc(t *testing.T) {
 	assert.Equal(t, "datastore-mysql", sql.GetType())
 	assert.Equal(t, "MySQL datastore", sql.GetDescription())
 	assert.NotEmpty(t, sql.String())
+}
+
+func assertNotPanic(t *testing.T) {
+	if r := recover(); r != nil {
+		// Expect panic to be called with non nil error
+		assert.True(t, false)
+	} else {
+		// This should never be called in case of a bug
+		assert.True(t, true)
+	}
+}
+
+func assertPanic(t *testing.T) {
+	if r := recover(); r != nil {
+		// Expect panic to be called with non nil error
+		assert.True(t, true)
+	} else {
+		// This should never be called in case of a bug
+		assert.True(t, false)
+	}
 }

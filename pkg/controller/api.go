@@ -32,11 +32,11 @@ func initApi() {
 	ginEntry.Router.POST("/v1/org/:orgId", UpdateOrg)
 
 	// Project
-	ginEntry.Router.GET("/v1/org/:orgId/proj", ListProj)
-	ginEntry.Router.GET("/v1/org/:orgId/proj/:projId", GetProj)
-	ginEntry.Router.PUT("/v1/org/:orgId/proj", CreateProj)
-	ginEntry.Router.DELETE("v1/org/:orgId/proj/:projId", DeleteProj)
-	ginEntry.Router.POST("v1/org/:orgId/proj/:projId", UpdateProj)
+	ginEntry.Router.GET("/v1/proj", ListProj)
+	ginEntry.Router.GET("/v1/proj/:projId", GetProj)
+	ginEntry.Router.PUT("/v1/proj", CreateProj)
+	ginEntry.Router.DELETE("/v1/proj/:projId", DeleteProj)
+	ginEntry.Router.POST("/v1/proj/:projId", UpdateProj)
 }
 
 func makeInternalError(ctx *gin.Context, message string, details ...interface{}) {
@@ -259,28 +259,28 @@ func UpdateOrg(ctx *gin.Context) {
 // @version 1.0
 // @Tags project
 // @produce application/json
-// @Param orgId path int true "Organization Id"
+// @Param orgId query int false "Organization Id"
 // @Success 200 {object} ListProjResponse
-// @Router /v1/org/{orgId}/proj [get]
+// @Router /v1/proj [get]
 func ListProj(ctx *gin.Context) {
 	projList := make([]*Proj, 0)
 
 	controller := GetController()
-	orgId := utils.ToInt(ctx.Param("orgId"))
+	orgId := utils.ToInt(ctx.Query("orgId"))
 
-	// 1: get org from repo
-	if _, ok := isOrgExist(ctx, controller, orgId); !ok {
-		return
-	}
-
-	// 2: list project from repo
+	// 1: list project from repo
 	projListFromRepo, err := controller.Repo.ListProj(orgId)
 	if err != nil {
-		makeInternalError(ctx, fmt.Sprintf("failed to list project from repository with orgId:%d", orgId))
+		switch err.(type) {
+		case *repository.NotFound:
+			makeNotFoundError(ctx, fmt.Sprintf(repository.OrgNotFoundMsg, orgId))
+		default:
+			makeInternalError(ctx, fmt.Sprintf(repository.OrgFailedToGetMsg, orgId), err)
+		}
 		return
 	}
 
-	// 3: convert to API model
+	// 2: convert to API model
 	for i := range projListFromRepo {
 		projList = append(projList, convertProj(projListFromRepo[i]))
 	}
@@ -296,23 +296,16 @@ func ListProj(ctx *gin.Context) {
 // @version 1.0
 // @Tags project
 // @produce application/json
-// @Param orgId path int true "Organization Id"
 // @Param projId path int true "Project Id"
 // @Success 200 {object} GetProjResponse
-// @Router /v1/org/{orgId}/proj/{projId} [get]
+// @Router /v1/proj/{projId} [get]
 func GetProj(ctx *gin.Context) {
 	controller := GetController()
 
-	orgId := utils.ToInt(ctx.Param("orgId"))
 	projId := utils.ToInt(ctx.Param("projId"))
 
-	// 1: get organization from repository
-	if _, ok := isOrgExist(ctx, controller, orgId); !ok {
-		return
-	}
-
-	// 2: get project from repository
-	projFromRepo, ok := isProjExist(ctx, controller, orgId, projId)
+	// 1: get project from repository
+	projFromRepo, ok := isProjExist(ctx, controller, projId)
 	if !ok || projFromRepo == nil {
 		return
 	}
@@ -328,13 +321,13 @@ func GetProj(ctx *gin.Context) {
 // @version 1.0
 // @Tags project
 // @produce application/json
-// @Param orgId path int true "Organization Id"
+// @Param orgId query int true "Organization Id"
 // @Param project body CreateProjRequest true "Project"
 // @Success 200 {object} CreateProjResponse
-// @Router /v1/org/{orgId}/proj [put]
+// @Router /v1/proj [put]
 func CreateProj(ctx *gin.Context) {
 	controller := GetController()
-	orgId := utils.ToInt(ctx.Param("orgId"))
+	orgId := utils.ToInt(ctx.Query("orgId"))
 
 	// 1: bind request
 	req := &CreateProjRequest{}
@@ -370,29 +363,22 @@ func CreateProj(ctx *gin.Context) {
 // @version 1.0
 // @Tags project
 // @produce application/json
-// @Param orgId path int true "Organization Id"
 // @Param projId path int true "Project Id"
 // @Success 200 {object} DeleteProjResponse
-// @Router /v1/org/{orgId}/proj/{projId} [delete]
+// @Router /v1/proj/{projId} [delete]
 func DeleteProj(ctx *gin.Context) {
 	controller := GetController()
 
-	orgId := utils.ToInt(ctx.Param("orgId"))
 	projId := utils.ToInt(ctx.Param("projId"))
 
-	// 1: get organization from repository
-	if _, ok := isOrgExist(ctx, controller, orgId); !ok {
-		return
-	}
-
-	// 2: remove project
-	succ, err := controller.Repo.RemoveProj(orgId, projId)
+	// 1: remove project
+	succ, err := controller.Repo.RemoveProj(projId)
 	if err != nil {
 		switch err.(type) {
 		case *repository.NotFound:
-			makeNotFoundError(ctx, fmt.Sprintf(repository.ProjNotFoundMsg, orgId, projId), err)
+			makeNotFoundError(ctx, fmt.Sprintf(repository.ProjNotFoundMsg, projId), err)
 		default:
-			makeInternalError(ctx, fmt.Sprintf(repository.ProjFailedToRemove, orgId, projId), err)
+			makeInternalError(ctx, fmt.Sprintf(repository.ProjFailedToRemove, projId), err)
 		}
 		return
 	}
@@ -408,15 +394,13 @@ func DeleteProj(ctx *gin.Context) {
 // @version 1.0
 // @Tags project
 // @produce application/json
-// @Param orgId path int true "Organization Id"
 // @Param projId path int true "Project Id"
 // @Param project body UpdateProjRequest true "Project"
 // @Success 200 {object} UpdateProjResponse
-// @Router /v1/org/{orgId}/proj/{projId} [post]
+// @Router /v1//proj/{projId} [post]
 func UpdateProj(ctx *gin.Context) {
 	controller := GetController()
 
-	orgId := utils.ToInt(ctx.Param("orgId"))
 	projId := utils.ToInt(ctx.Param("projId"))
 
 	// 1: bind request
@@ -428,13 +412,8 @@ func UpdateProj(ctx *gin.Context) {
 		return
 	}
 
-	// 2: get organization from repository
-	if _, ok := isOrgExist(ctx, controller, orgId); !ok {
-		return
-	}
-
 	// 3: get project from repository
-	projFromRepo, ok := isProjExist(ctx, controller, orgId, projId)
+	projFromRepo, ok := isProjExist(ctx, controller, projId)
 	if !ok || projFromRepo == nil {
 		return
 	}
@@ -445,7 +424,7 @@ func UpdateProj(ctx *gin.Context) {
 	// 5: update project to repository
 	succ, err := controller.Repo.UpdateProj(projFromRepo)
 	if err != nil {
-		makeInternalError(ctx, fmt.Sprintf("failed to update project with orgId:%d projId:%d", orgId, projId), err)
+		makeInternalError(ctx, fmt.Sprintf("failed to update project with projId:%d", projId), err)
 		return
 	}
 
@@ -473,19 +452,19 @@ func isOrgExist(ctx *gin.Context, controller *Controller, orgId int) (*repositor
 	return org, true
 }
 
-func isProjExist(ctx *gin.Context, controller *Controller, orgId, projId int) (*repository.Proj, bool) {
-	proj, err := controller.Repo.GetProj(orgId, projId)
+func isProjExist(ctx *gin.Context, controller *Controller, projId int) (*repository.Proj, bool) {
+	proj, err := controller.Repo.GetProj(projId)
 	if err != nil {
 		switch err.(type) {
 		case *repository.NotFound:
-			makeNotFoundError(ctx, fmt.Sprintf(repository.ProjNotFoundMsg, orgId, projId))
+			makeNotFoundError(ctx, fmt.Sprintf(repository.ProjNotFoundMsg, projId))
 		default:
-			makeInternalError(ctx, fmt.Sprintf(repository.ProjFailedToGetMsg, orgId, projId), err)
+			makeInternalError(ctx, fmt.Sprintf(repository.ProjFailedToGetMsg, projId), err)
 		}
 		return nil, false
 	}
 	if proj == nil {
-		makeNotFoundError(ctx, fmt.Sprintf(repository.ProjNotFoundMsg, orgId, projId))
+		makeNotFoundError(ctx, fmt.Sprintf(repository.ProjNotFoundMsg, projId))
 		return nil, false
 	}
 

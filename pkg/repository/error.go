@@ -5,9 +5,9 @@ import "fmt"
 const (
 	OrgNotFoundMsg     = "organization not found with orgId:%d"
 	OrgFailedToGetMsg  = "failed to get organization with orgId:%d"
-	ProjNotFoundMsg    = "project not found with orgId:%d projId:%d"
-	ProjFailedToGetMsg = "failed to get project with orgId:%d projId:%d"
-	ProjFailedToRemove = "failed to remove project with orgId:%d projId:%d"
+	ProjNotFoundMsg    = "project not found with projId:%d"
+	ProjFailedToGetMsg = "failed to get project with projId:%d"
+	ProjFailedToRemove = "failed to remove project with projId:%d"
 )
 
 type NotFound struct {

@@ -15,6 +15,44 @@
         "version": "1.0"
     },
     "paths": {
+        "/v1//proj/{projId}": {
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project"
+                ],
+                "summary": "update project",
+                "operationId": "10",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project Id",
+                        "name": "projId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Project",
+                        "name": "project",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateProjRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateProjResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/org": {
             "get": {
                 "produces": [
@@ -154,7 +192,7 @@
                 }
             }
         },
-        "/v1/org/{orgId}/proj": {
+        "/v1/proj": {
             "get": {
                 "produces": [
                     "application/json"
@@ -169,8 +207,7 @@
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "path",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -196,7 +233,7 @@
                         "type": "integer",
                         "description": "Organization Id",
                         "name": "orgId",
-                        "in": "path",
+                        "in": "query",
                         "required": true
                     },
                     {
@@ -219,7 +256,7 @@
                 }
             }
         },
-        "/v1/org/{orgId}/proj/{projId}": {
+        "/v1/proj/{projId}": {
             "get": {
                 "produces": [
                     "application/json"
@@ -230,13 +267,6 @@
                 "summary": "Get project",
                 "operationId": "7",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Project Id",
@@ -254,49 +284,6 @@
                     }
                 }
             },
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project"
-                ],
-                "summary": "update project",
-                "operationId": "10",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "Project Id",
-                        "name": "projId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Project",
-                        "name": "project",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.UpdateProjRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controller.UpdateProjResponse"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "produces": [
                     "application/json"
@@ -307,13 +294,6 @@
                 "summary": "delete project",
                 "operationId": "9",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "path",
-                        "required": true
-                    },
                     {
                         "type": "integer",
                         "description": "Project Id",

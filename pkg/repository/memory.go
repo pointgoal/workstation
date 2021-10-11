@@ -183,6 +183,15 @@ func (m *Memory) UpdateOrg(org *Org) (bool, error) {
 func (m *Memory) ListProj(orgId int) ([]*Proj, error) {
 	res := make([]*Proj, 0)
 
+	if orgId < 0 {
+		// returns all project
+		for i := range m.orgMap {
+			res = append(res, m.orgMap[i].ProjList...)
+		}
+
+		return res, nil
+	}
+
 	org, ok := m.orgMap[orgId]
 	if !ok {
 		return res, NewNotFoundf(OrgNotFoundMsg, orgId)
@@ -214,49 +223,41 @@ func (m *Memory) CreateProj(proj *Proj) (bool, error) {
 }
 
 // GetProj as function name described
-func (m *Memory) GetProj(orgId, projId int) (*Proj, error) {
-	org, ok := m.orgMap[orgId]
-
-	if !ok || org == nil {
-		return nil, NewNotFoundf(OrgNotFoundMsg, orgId)
-	}
-
+func (m *Memory) GetProj(projId int) (*Proj, error) {
 	var res *Proj
-	for i := range org.ProjList {
-		proj := org.ProjList[i]
-		if proj.Id == projId {
-			res = proj
-			break
+
+	for i := range m.orgMap {
+		org := m.orgMap[i]
+		for i := range org.ProjList {
+			proj := org.ProjList[i]
+			if proj.Id == projId {
+				res = proj
+				return res, nil
+			}
 		}
 	}
 
-	if res == nil {
-		return nil, NewNotFoundf(ProjNotFoundMsg, orgId, projId)
-	}
-
-	return res, nil
+	return nil, NewNotFoundf(ProjNotFoundMsg, projId)
 }
 
 // RemoveProj as function name described
-func (m *Memory) RemoveProj(orgId int, projId int) (bool, error) {
-	org, ok := m.orgMap[orgId]
-	if !ok || org == nil {
-		return false, NewNotFoundf(OrgNotFoundMsg, orgId)
-	}
-
-	// Remove from proj list
-	index := -1
-	for index = range org.ProjList {
-		proj := org.ProjList[index]
-		if proj.Id == projId {
-			break
+func (m *Memory) RemoveProj(projId int) (bool, error) {
+	for i := range m.orgMap {
+		org := m.orgMap[i]
+		// Remove from proj list
+		index := -1
+		for index = range org.ProjList {
+			proj := org.ProjList[index]
+			if proj.Id == projId {
+				break
+			}
 		}
-	}
 
-	if index < 0 {
-		return false, NewNotFoundf(ProjNotFoundMsg, orgId, projId)
+		if index < 0 {
+			return false, NewNotFoundf(ProjNotFoundMsg, projId)
+		}
+		org.ProjList = append(org.ProjList[:index], org.ProjList[index+1:]...)
 	}
-	org.ProjList = append(org.ProjList[:index], org.ProjList[index+1:]...)
 
 	return true, nil
 }
@@ -281,7 +282,7 @@ func (m *Memory) UpdateProj(proj *Proj) (bool, error) {
 	}
 
 	if index < 0 {
-		return false, NewNotFoundf(ProjNotFoundMsg, proj.OrgId, proj.Id)
+		return false, NewNotFoundf(ProjNotFoundMsg, proj.Id)
 	}
 
 	org.ProjList[index].Name = proj.Name

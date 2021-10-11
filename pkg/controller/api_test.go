@@ -162,21 +162,16 @@ func TestListProj(t *testing.T) {
 	repo := repository.RegisterMemory()
 	RegisterController()
 
-	// expect 404
+	// expect 200
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
-	ListProj(ctx)
-	assert.Equal(t, http.StatusNotFound, writer.StatusCode)
-
-	// expect 200
-	writer = &httptest.TestResponseWriter{}
-	ctx, _ = gin.CreateTestContext(writer)
+	ctx.Request = &http.Request{
+		URL: &url.URL{
+			RawQuery: "orgId=1;",
+		},
+	}
 	repo.CreateOrg(&repository.Org{
 		Name: "ut-org",
-	})
-	ctx.Params = append(ctx.Params, gin.Param{
-		Key:   "orgId",
-		Value: "1",
 	})
 	ListProj(ctx)
 	assert.Equal(t, http.StatusOK, writer.StatusCode)
@@ -211,18 +206,17 @@ func TestGetProj(t *testing.T) {
 	// expect 200
 	writer = &httptest.TestResponseWriter{}
 	ctx, _ = gin.CreateTestContext(writer)
+	ctx.Request = &http.Request{
+		URL: &url.URL{},
+	}
 	repo.CreateProj(&repository.Proj{
 		OrgId: 1,
 		Name:  "ut-org",
 	})
 	ctx.Params = append(ctx.Params, gin.Param{
-		Key:   "orgId",
+		Key:   "projId",
 		Value: "1",
-	},
-		gin.Param{
-			Key:   "projId",
-			Value: "1",
-		})
+	})
 	GetProj(ctx)
 	assert.Equal(t, http.StatusOK, writer.StatusCode)
 }
@@ -251,14 +245,12 @@ func TestCreateProj(t *testing.T) {
 	stringReader = strings.NewReader(`{name:"ut-name"}`)
 	ctx.Request = &http.Request{
 		Body: ioutil.NopCloser(stringReader),
-		URL:  &url.URL{},
+		URL: &url.URL{
+			RawQuery: "orgId=1;",
+		},
 	}
 	repo.CreateOrg(&repository.Org{
 		Name: "ut-org",
-	})
-	ctx.Params = append(ctx.Params, gin.Param{
-		Key:   "orgId",
-		Value: "1",
 	})
 	CreateProj(ctx)
 	assert.Equal(t, http.StatusOK, writer.StatusCode)
@@ -271,15 +263,9 @@ func TestDeleteProj(t *testing.T) {
 	repo := repository.RegisterMemory()
 	RegisterController()
 
-	// expect 404 without org
+	// expect 404 without proj
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
-	DeleteProj(ctx)
-	assert.Equal(t, http.StatusNotFound, writer.StatusCode)
-
-	// expect 404 without proj
-	writer = &httptest.TestResponseWriter{}
-	ctx, _ = gin.CreateTestContext(writer)
 	stringReader := strings.NewReader(`{name:"ut-name"}`)
 	ctx.Request = &http.Request{
 		Body: ioutil.NopCloser(stringReader),
@@ -287,10 +273,6 @@ func TestDeleteProj(t *testing.T) {
 	}
 	repo.CreateOrg(&repository.Org{
 		Name: "ut-org",
-	})
-	ctx.Params = append(ctx.Params, gin.Param{
-		Key:   "orgId",
-		Value: "1",
 	})
 	DeleteProj(ctx)
 	assert.Equal(t, http.StatusNotFound, writer.StatusCode)
@@ -303,13 +285,9 @@ func TestDeleteProj(t *testing.T) {
 		OrgId: 1,
 	})
 	ctx.Params = append(ctx.Params, gin.Param{
-		Key:   "orgId",
+		Key:   "projId",
 		Value: "1",
-	},
-		gin.Param{
-			Key:   "projId",
-			Value: "1",
-		})
+	})
 	DeleteProj(ctx)
 	assert.Equal(t, http.StatusOK, writer.StatusCode)
 }
@@ -344,13 +322,9 @@ func TestUpdateProj(t *testing.T) {
 		Name: "ut-org",
 	})
 	ctx.Params = append(ctx.Params, gin.Param{
-		Key:   "orgId",
+		Key:   "projId",
 		Value: "1",
-	},
-		gin.Param{
-			Key:   "projId",
-			Value: "1",
-		})
+	})
 	UpdateProj(ctx)
 	assert.Equal(t, http.StatusNotFound, writer.StatusCode)
 
@@ -367,13 +341,9 @@ func TestUpdateProj(t *testing.T) {
 		OrgId: 1,
 	})
 	ctx.Params = append(ctx.Params, gin.Param{
-		Key:   "orgId",
+		Key:   "projId",
 		Value: "1",
-	},
-		gin.Param{
-			Key:   "projId",
-			Value: "1",
-		})
+	})
 	UpdateProj(ctx)
 	assert.Equal(t, http.StatusOK, writer.StatusCode)
 }

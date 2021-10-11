@@ -30,10 +30,7 @@ type BootConfig struct {
 	Repository struct {
 		Enabled  bool   `yaml:"enabled" json:"enabled"`
 		Provider string `yaml:"provider" json:"provider"`
-		Local    struct {
-			DataDir string `yaml:"dataDir" json:"dataDir"`
-		} `yaml:"local" json:"local"`
-		MySql struct {
+		MySql    struct {
 			User     string   `yaml:"user" json:"user"`
 			Pass     string   `yaml:"pass" json:"pass"`
 			Protocol string   `yaml:"protocol" json:"protocol"`
@@ -49,7 +46,7 @@ type BootConfig struct {
 				Ref string `yaml:"ref" json:"ref"`
 			} `yaml:"eventLogger" json:"eventLogger"`
 		} `yaml:"logger" json:"logger"`
-	} `yaml:"datastore" json:"datastore"`
+	} `yaml:"repository" json:"repository"`
 }
 
 // RegisterRepositoryFromConfig is an implementation of:
@@ -64,10 +61,6 @@ func RegisterRepositoryFromConfig(configFilePath string) map[string]rkentry.Entr
 	// 3: construct entry
 	if config.Repository.Enabled {
 		switch config.Repository.Provider {
-		case "local":
-			repo := RegisterLocalFs(
-				WithRootPathLocalFs(config.Repository.Local.DataDir))
-			res[repo.GetName()] = repo
 		case "mySql":
 			repo := RegisterMySql(
 				WithUser(config.Repository.MySql.User),
@@ -125,10 +118,10 @@ type Repository interface {
 	CreateProj(proj *Proj) (bool, error)
 
 	// GetProj as function name described
-	GetProj(int, int) (*Proj, error)
+	GetProj(int) (*Proj, error)
 
 	// RemoveProj as function name described
-	RemoveProj(int, int) (bool, error)
+	RemoveProj(int) (bool, error)
 
 	// UpdateProj as function name described
 	UpdateProj(org *Proj) (bool, error)
