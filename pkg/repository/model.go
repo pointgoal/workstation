@@ -13,8 +13,9 @@ import (
 )
 
 var (
-	orgKey  = &Org{}
-	projKey = &Proj{}
+	orgKey    = &Org{}
+	projKey   = &Proj{}
+	sourceKey = &Source{}
 )
 
 // ************************************************ //
@@ -23,7 +24,6 @@ var (
 
 // Base defines base model of gorm model
 type Base struct {
-	Id        int            `yaml:"id" json:"id" gorm:"primarykey"`
 	CreatedAt time.Time      `yaml:"createdAt" json:"createdAt"`
 	UpdatedAt time.Time      `yaml:"updatedAt" json:"updatedAt"`
 	DeletedAt gorm.DeletedAt `yaml:"-" json:"-" gorm:"index"`
@@ -36,6 +36,7 @@ type Base struct {
 // Org defines organizations in workstation.
 type Org struct {
 	Base
+	Id       int     `yaml:"id" json:"id" gorm:"primaryKey"`
 	Name     string  `yaml:"name" json:"name"`
 	ProjList []*Proj `yaml:"-" json:"-"`
 }
@@ -47,23 +48,9 @@ func NewOrg(name string) *Org {
 		name = utils.CreateId()
 	}
 
-	//now := time.Now()
 	return &Org{
 		Name: name,
 	}
-}
-
-// Equal compares organization.
-// Why we need it? Because of time.Time
-func (org *Org) Equal(in *Org) bool {
-	if in == nil {
-		return false
-	}
-
-	return org.Name == in.Name &&
-		org.Id == in.Id &&
-		org.CreatedAt.Equal(in.CreatedAt) &&
-		org.UpdatedAt.Equal(in.UpdatedAt)
 }
 
 // String will marshal organization into json format.
@@ -79,41 +66,28 @@ func (org *Org) String() string {
 // Proj defines projects in workstation.
 type Proj struct {
 	Base
-	OrgId int    `yaml:"orgId" json:"orgId" gorm:"index"`
-	Name  string `yaml:"name" json:"name" gorm:"index"`
+	Id     int     `yaml:"id" json:"id" gorm:"primaryKey"`
+	OrgId  int     `yaml:"orgId" json:"orgId" gorm:"index"`
+	Name   string  `yaml:"name" json:"name" gorm:"index"`
+	Source *Source `yaml:"source" json:"source"`
 }
 
 // NewProject create a project with params.
 // A new name will be assigned with random Id if name is empty.
-func NewProj(orgId int, name string) *Proj {
+func NewProj(name string) *Proj {
 	if len(name) < 1 {
 		name = utils.CreateId()
 	}
 
 	return &Proj{
-		OrgId: orgId,
-		Name:  name,
+		Name: name,
 	}
 }
 
-// String will marshal organization into json format.
+// String will marshal project into json format.
 func (proj *Proj) String() string {
 	bytes, _ := json.Marshal(proj)
 	return string(bytes)
-}
-
-// Equal compares project.
-// Why we need it? Because of time.Time
-func (proj *Proj) Equal(in *Proj) bool {
-	if in == nil {
-		return false
-	}
-
-	return proj.OrgId == in.OrgId &&
-		proj.Id == in.Id &&
-		proj.Name == in.Name &&
-		proj.CreatedAt.Equal(in.CreatedAt) &&
-		proj.UpdatedAt.Equal(in.UpdatedAt)
 }
 
 // ******************************************** //
@@ -122,20 +96,23 @@ func (proj *Proj) Equal(in *Proj) bool {
 
 type Source struct {
 	Base
-	OrgId  int     `yaml:"orgId" json:"orgId" gorm:"index"`
-	ProjId int     `yaml:"projId" json:"projId" gorm:"index"`
-	Type   string  `yaml:"type" json:"type" gorm:"index"`
-	Github *Github `yaml:"github" json:"github"`
-	Local  *Local  `yaml:"local" json:"local"`
+	Id         int    `yaml:"id" json:"id" gorm:"primaryKey"`
+	ProjId     int    `yaml:"projId" json:"projId" gorm:"index"`
+	Type       string `yaml:"type" json:"type" gorm:"index"`
+	Repository string `yaml:"repository" json:"repository"`
 }
 
-type Github struct {
-	Base
-	Repository  string `yaml:"repository" json:"repository"`
-	AccessToken string `yaml:"accessToken" json:"accessToken"`
+// NewSource create a project with params.
+// A new name will be assigned with random Id if name is empty.
+func NewSource(repoType, repository string) *Source {
+	return &Source{
+		Type:       repoType,
+		Repository: repository,
+	}
 }
 
-type Local struct {
-	Base
-	FullPath string `yaml:"fullPath" json:"fullPath"`
+// String will marshal source into json format.
+func (src *Source) String() string {
+	bytes, _ := json.Marshal(src)
+	return string(bytes)
 }

@@ -20,6 +20,9 @@
       - [Get project](#get-project)
       - [Update project](#update-project)
       - [Delete project](#delete-project)
+    - [Source](#source)
+      - [Create source](#create-source)
+      - [Delete source](#delete-source)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -159,7 +162,7 @@ $ curl -X DELETE "http://localhost:8080/v1/org/4"
 ### Projects
 | API | Description |
 | --- | --- |
-| GET /v1/proj?ordId=? | List projects |
+| GET /v1/proj?orgId=? | List projects |
 | PUT /v1/proj | Create project |
 | GET /v1/proj/{projId} | Get project |
 | POST /v1/proj/{projId} | Update project |
@@ -228,6 +231,29 @@ $ curl -X POST "http://localhost:8080/v1/proj/3" -d "{  \"name\": \"my-new-proj\
 #### Delete project
 ```shell script
 $ curl -X DELETE "http://localhost:8080/v1/proj/3"
+{
+  "status": true
+}
+```
+
+### Source
+| API | Description |
+| --- | --- |
+| PUT /v1/source?projId=? | Create source |
+| DELETE /v1/source/{sourceId} | Delete source |
+
+#### Create source
+```shell script
+$ curl -X PUT "http://localhost:8080/v1/source?projId=1" -d "{  \"repository\": \"repo-1\",  \"type\": \"github\"}"
+{
+  "projId": 1,
+  "sourceId": 1
+}
+```
+
+#### Delete source
+```shell script
+$ curl -X DELETE "http://localhost:8080/v1/source/1"
 {
   "status": true
 }

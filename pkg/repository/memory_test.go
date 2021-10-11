@@ -110,7 +110,8 @@ func TestMemory_Project_Operations(t *testing.T) {
 	assert.Nil(t, err)
 
 	// create a project
-	proj := NewProj(org.Id, "ut-proj")
+	proj := NewProj("ut-proj")
+	proj.OrgId = org.Id
 	succ, err = repo.CreateProj(proj)
 	assert.True(t, succ)
 	assert.Nil(t, err)
@@ -123,6 +124,35 @@ func TestMemory_Project_Operations(t *testing.T) {
 
 	// remove proj
 	succ, err = repo.RemoveProj(proj.Id)
+	assert.True(t, succ)
+	assert.Nil(t, err)
+}
+
+func TestMemory_Source_Operations(t *testing.T) {
+	repo := RegisterMemory()
+
+	// create an org
+	org := NewOrg("ut-org")
+	succ, err := repo.CreateOrg(org)
+	assert.True(t, succ)
+	assert.Nil(t, err)
+
+	// create a project
+	proj := NewProj("ut-proj")
+	proj.OrgId = org.Id
+	succ, err = repo.CreateProj(proj)
+	assert.True(t, succ)
+	assert.Nil(t, err)
+
+	// create source
+	src := NewSource("ut-repo-type", "ut-repo")
+	src.ProjId = proj.Id
+	succ, err = repo.CreateSource(src)
+	assert.True(t, succ)
+	assert.Nil(t, err)
+
+	// remove source
+	succ, err = repo.RemoveSource(src.Id)
 	assert.True(t, succ)
 	assert.Nil(t, err)
 }

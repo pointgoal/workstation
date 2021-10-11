@@ -125,4 +125,14 @@ type Repository interface {
 
 	// UpdateProj as function name described
 	UpdateProj(org *Proj) (bool, error)
+
+	// ******************************************** //
+	// ************** Source related ************** //
+	// ******************************************** //
+
+	// CreateSource as function name described
+	CreateSource(src *Source) (bool, error)
+
+	// RemoveSource as function name described
+	RemoveSource(int) (bool, error)
 }

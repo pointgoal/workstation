@@ -16,6 +16,20 @@ definitions:
       projId:
         type: integer
     type: object
+  controller.CreateSourceRequest:
+    properties:
+      repository:
+        type: string
+      type:
+        type: string
+    type: object
+  controller.CreateSourceResponse:
+    properties:
+      projId:
+        type: integer
+      sourceId:
+        type: integer
+    type: object
   controller.DeleteOrgResponse:
     properties:
       status:
@@ -105,6 +119,23 @@ definitions:
         type: string
       orgId:
         type: integer
+      source:
+        $ref: '#/definitions/repository.Source'
+      updatedAt:
+        type: string
+    type: object
+  repository.Source:
+    properties:
+      createdAt:
+        type: string
+      id:
+        type: integer
+      projId:
+        type: integer
+      repository:
+        type: string
+      type:
+        type: string
       updatedAt:
         type: string
     type: object
@@ -120,31 +151,6 @@ info:
   title: Workstation
   version: "1.0"
 paths:
-  /v1//proj/{projId}:
-    post:
-      operationId: "10"
-      parameters:
-      - description: Project Id
-        in: path
-        name: projId
-        required: true
-        type: integer
-      - description: Project
-        in: body
-        name: project
-        required: true
-        schema:
-          $ref: '#/definitions/controller.UpdateProjRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/controller.UpdateProjResponse'
-      summary: update project
-      tags:
-      - project
   /v1/org:
     get:
       operationId: "1"
@@ -316,4 +322,72 @@ paths:
       summary: Get project
       tags:
       - project
+    post:
+      operationId: "10"
+      parameters:
+      - description: Project Id
+        in: path
+        name: projId
+        required: true
+        type: integer
+      - description: Project
+        in: body
+        name: project
+        required: true
+        schema:
+          $ref: '#/definitions/controller.UpdateProjRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.UpdateProjResponse'
+      summary: update project
+      tags:
+      - project
+  /v1/source:
+    put:
+      operationId: "11"
+      parameters:
+      - description: Project Id
+        in: query
+        name: projId
+        required: true
+        type: integer
+      - description: Source
+        in: body
+        name: source
+        required: true
+        schema:
+          $ref: '#/definitions/controller.CreateSourceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.CreateSourceResponse'
+      summary: create source
+      tags:
+      - source
+  /v1/source/{sourceId}:
+    delete:
+      operationId: "12"
+      parameters:
+      - description: Source Id
+        in: path
+        name: sourceId
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.DeleteProjResponse'
+      summary: delete source
+      tags:
+      - source
 swagger: "2.0"

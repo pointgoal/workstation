@@ -72,7 +72,7 @@ type CreateProjRequest struct {
 	Name string `yaml:"name" json:"name"`
 }
 
-// DeleteProjectResponse response of delete project
+// DeleteProjResponse response of delete project
 type DeleteProjResponse struct {
 	Status bool `yaml:"status" json:"status"`
 }
@@ -85,4 +85,25 @@ type UpdateProjResponse struct {
 // UpdateProjRequest request body
 type UpdateProjRequest struct {
 	Name string `yaml:"name" json:"name"`
+}
+
+// ******************************************** //
+// ************** Source related ************** //
+// ******************************************** //
+
+// CreateSourceRequest request body
+type CreateSourceRequest struct {
+	Type       string `yaml:"type" json:"type"`
+	Repository string `yaml:"repository" json:"repository"`
+}
+
+// CreateSourceResponse response of create source
+type CreateSourceResponse struct {
+	ProjId   int `yaml:"projId" json:"projId"`
+	SourceId int `yaml:"sourceId" json:"sourceId"`
+}
+
+// DeleteSourceResponse response of delete source
+type DeleteSourceResponse struct {
+	Status bool `yaml:"status" json:"status"`
 }

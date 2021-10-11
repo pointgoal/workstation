@@ -353,5 +353,58 @@ func (m *Memory) assignRequiredFields(in interface{}) {
 		now := time.Now()
 		v.CreatedAt = now
 		v.UpdatedAt = now
+	case *Source:
+		id := m.lastIndex[sourceKey] + 1
+		m.lastIndex[sourceKey] = id
+		v.Id = id
+		now := time.Now()
+		v.CreatedAt = now
+		v.UpdatedAt = now
 	}
+}
+
+// ******************************************** //
+// ************** Source related ************** //
+// ******************************************** //
+
+// CreateSource as function name described
+func (m *Memory) CreateSource(src *Source) (bool, error) {
+	if src == nil {
+		return false, errors.New("nil source")
+	}
+
+	m.assignRequiredFields(src)
+
+	// return error if project does not exist
+	proj, err := m.GetProj(src.ProjId)
+	if err != nil {
+		return false, NewNotFoundf(ProjNotFoundMsg, proj.OrgId)
+	}
+
+	proj.Source = src
+
+	return true, nil
+}
+
+// RemoveSource as function name described
+func (m *Memory) RemoveSource(sourceId int) (bool, error) {
+	for i := range m.orgMap {
+		org := m.orgMap[i]
+		// Remove from proj list
+		index := -1
+		for index = range org.ProjList {
+			proj := org.ProjList[index]
+			if proj.Source != nil && proj.Source.Id == sourceId {
+				break
+			}
+		}
+
+		if index < 0 {
+			return false, NewNotFoundf(SourceNotFoundMsg, sourceId)
+		}
+
+		org.ProjList[index].Source = nil
+	}
+
+	return true, nil
 }

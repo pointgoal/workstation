@@ -15,44 +15,6 @@
         "version": "1.0"
     },
     "paths": {
-        "/v1//proj/{projId}": {
-            "post": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project"
-                ],
-                "summary": "update project",
-                "operationId": "10",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Project Id",
-                        "name": "projId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Project",
-                        "name": "project",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/controller.UpdateProjRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/controller.UpdateProjResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/v1/org": {
             "get": {
                 "produces": [
@@ -284,6 +246,42 @@
                     }
                 }
             },
+            "post": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "project"
+                ],
+                "summary": "update project",
+                "operationId": "10",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project Id",
+                        "name": "projId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Project",
+                        "name": "project",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateProjRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.UpdateProjResponse"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "produces": [
                     "application/json"
@@ -298,6 +296,73 @@
                         "type": "integer",
                         "description": "Project Id",
                         "name": "projId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.DeleteProjResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/source": {
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "source"
+                ],
+                "summary": "create source",
+                "operationId": "11",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Project Id",
+                        "name": "projId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "Source",
+                        "name": "source",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/controller.CreateSourceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.CreateSourceResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/source/{sourceId}": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "source"
+                ],
+                "summary": "delete source",
+                "operationId": "12",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Source Id",
+                        "name": "sourceId",
                         "in": "path",
                         "required": true
                     }
@@ -337,6 +402,28 @@
                     "type": "integer"
                 },
                 "projId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "controller.CreateSourceRequest": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
+                }
+            }
+        },
+        "controller.CreateSourceResponse": {
+            "type": "object",
+            "properties": {
+                "projId": {
+                    "type": "integer"
+                },
+                "sourceId": {
                     "type": "integer"
                 }
             }
@@ -480,6 +567,32 @@
                 },
                 "orgId": {
                     "type": "integer"
+                },
+                "source": {
+                    "$ref": "#/definitions/repository.Source"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "repository.Source": {
+            "type": "object",
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "projId": {
+                    "type": "integer"
+                },
+                "repository": {
+                    "type": "string"
+                },
+                "type": {
+                    "type": "string"
                 },
                 "updatedAt": {
                     "type": "string"

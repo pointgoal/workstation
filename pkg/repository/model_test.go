@@ -30,20 +30,34 @@ func TestNewOrg_String(t *testing.T) {
 }
 
 func TestNewProj_WithEmptyName(t *testing.T) {
-	proj := NewProj(1, "")
+	proj := NewProj("")
 
 	assert.NotNil(t, proj)
 	assert.NotEmpty(t, proj.Name)
 }
 
 func TestNewProj_HappyCase(t *testing.T) {
-	proj := NewProj(1, "ut-proj")
+	proj := NewProj("ut-proj")
 
 	assert.NotNil(t, proj)
 	assert.Equal(t, "ut-proj", proj.Name)
 }
 
-func TestProject_String(t *testing.T) {
-	proj := NewProj(1, "")
+func TestProj_String(t *testing.T) {
+	proj := NewProj("")
 	assert.NotEmpty(t, proj.String())
+}
+
+func TestNewSource_HappyCase(t *testing.T) {
+	src := NewSource("github", "ut/ut-repo")
+	src.ProjId = 1
+	assert.NotNil(t, src)
+	assert.Equal(t, 1, src.ProjId)
+	assert.Equal(t, "github", src.Type)
+	assert.Equal(t, "ut/ut-repo", src.Repository)
+}
+
+func TestSource_String(t *testing.T) {
+	src := NewSource("github", "ut/ut-repo")
+	assert.NotEmpty(t, src.String())
 }

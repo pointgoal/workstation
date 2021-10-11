@@ -14,11 +14,11 @@ import (
 )
 
 func TestRegisterDataStoreFromConfig(t *testing.T) {
-	// For localFs
+	// For memory
 	bootConfigStr := `
 repository:
   enabled: true
-  provider: localFs
+  provider: memory
 `
 
 	tempDir := path.Join(t.TempDir(), "boot.yaml")
@@ -45,7 +45,7 @@ func TestGetDataStore(t *testing.T) {
 	bootConfigStr := `
 repository:
   enabled: true
-  provider: local
+  provider: memory
 `
 
 	tempDir := path.Join(t.TempDir(), "boot.yaml")

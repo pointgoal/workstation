@@ -37,6 +37,10 @@ func initApi() {
 	ginEntry.Router.PUT("/v1/proj", CreateProj)
 	ginEntry.Router.DELETE("/v1/proj/:projId", DeleteProj)
 	ginEntry.Router.POST("/v1/proj/:projId", UpdateProj)
+
+	// Source
+	ginEntry.Router.PUT("/v1/source", CreateSource)
+	ginEntry.Router.DELETE("/v1/source/:sourceId", DeleteSource)
 }
 
 func makeInternalError(ctx *gin.Context, message string, details ...interface{}) {
@@ -49,6 +53,13 @@ func makeInternalError(ctx *gin.Context, message string, details ...interface{})
 func makeNotFoundError(ctx *gin.Context, message string, details ...interface{}) {
 	ctx.JSON(http.StatusNotFound, rkerror.New(
 		rkerror.WithHttpCode(http.StatusNotFound),
+		rkerror.WithMessage(message),
+		rkerror.WithDetails(details...)))
+}
+
+func makeAlreadyExistError(ctx *gin.Context, message string, details ...interface{}) {
+	ctx.JSON(http.StatusConflict, rkerror.New(
+		rkerror.WithHttpCode(http.StatusConflict),
 		rkerror.WithMessage(message),
 		rkerror.WithDetails(details...)))
 }
@@ -73,6 +84,10 @@ func convertProj(projFromRepo *repository.Proj) *Proj {
 
 	return proj
 }
+
+// ************************************************** //
+// ************** Organization related ************** //
+// ************************************************** //
 
 // ListOrg
 // @Summary List organizations
@@ -253,6 +268,10 @@ func UpdateOrg(ctx *gin.Context) {
 	})
 }
 
+// ********************************************* //
+// ************** Project related ************** //
+// ********************************************* //
+
 // ListProj
 // @Summary List projects
 // @Id 6
@@ -344,7 +363,8 @@ func CreateProj(ctx *gin.Context) {
 	}
 
 	// 3: create project
-	proj := repository.NewProj(orgId, req.Name)
+	proj := repository.NewProj(req.Name)
+	proj.OrgId = orgId
 	_, err := controller.Repo.CreateProj(proj)
 	if err != nil {
 		makeInternalError(ctx, fmt.Sprintf("failed to create project with orgId:%d", orgId), err)
@@ -397,7 +417,7 @@ func DeleteProj(ctx *gin.Context) {
 // @Param projId path int true "Project Id"
 // @Param project body UpdateProjRequest true "Project"
 // @Success 200 {object} UpdateProjResponse
-// @Router /v1//proj/{projId} [post]
+// @Router /v1/proj/{projId} [post]
 func UpdateProj(ctx *gin.Context) {
 	controller := GetController()
 
@@ -429,6 +449,87 @@ func UpdateProj(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, &UpdateProjResponse{
+		Status: succ,
+	})
+}
+
+// ******************************************** //
+// ************** Source related ************** //
+// ******************************************** //
+
+// CreateSource
+// @Summary create source
+// @Id 11
+// @version 1.0
+// @Tags source
+// @produce application/json
+// @Param projId query int true "Project Id"
+// @Param source body CreateSourceRequest true "Source"
+// @Success 200 {object} CreateSourceResponse
+// @Router /v1/source [put]
+func CreateSource(ctx *gin.Context) {
+	controller := GetController()
+	projId := utils.ToInt(ctx.Query("projId"))
+
+	// 1: bind request
+	req := &CreateSourceRequest{}
+	if err := ctx.ShouldBind(req); err != nil {
+		ctx.JSON(http.StatusBadRequest, rkerror.New(
+			rkerror.WithHttpCode(http.StatusBadRequest),
+			rkerror.WithMessage(err.Error())))
+		return
+	}
+
+	// 2: get project from repository
+	if proj, ok := isProjExist(ctx, controller, projId); !ok {
+		return
+	} else if proj.Source != nil {
+		makeAlreadyExistError(ctx, fmt.Sprintf("source already exist in project with id:%d", proj.Source.Id))
+		return
+	}
+
+	// 3: create source
+	src := repository.NewSource(req.Type, req.Repository)
+	src.ProjId = projId
+	_, err := controller.Repo.CreateSource(src)
+	if err != nil {
+		makeInternalError(ctx, fmt.Sprintf("failed to create source with projId:%d", projId), err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, &CreateSourceResponse{
+		ProjId:   src.ProjId,
+		SourceId: src.Id,
+	})
+}
+
+// DeleteSource
+// @Summary delete source
+// @Id 12
+// @version 1.0
+// @Tags source
+// @produce application/json
+// @Param sourceId path int true "Source Id"
+// @Success 200 {object} DeleteProjResponse
+// @Router /v1/source/{sourceId} [delete]
+func DeleteSource(ctx *gin.Context) {
+	controller := GetController()
+
+	sourceId := utils.ToInt(ctx.Param("sourceId"))
+
+	// 1: remove project
+	succ, err := controller.Repo.RemoveSource(sourceId)
+	if err != nil {
+		switch err.(type) {
+		case *repository.NotFound:
+			makeNotFoundError(ctx, fmt.Sprintf(repository.SourceNotFoundMsg, sourceId), err)
+		default:
+			makeInternalError(ctx, fmt.Sprintf(repository.SourceFailedToRemove, sourceId), err)
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, &DeleteSourceResponse{
 		Status: succ,
 	})
 }

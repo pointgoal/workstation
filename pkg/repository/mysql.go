@@ -261,6 +261,7 @@ func (m *MySql) Bootstrap(ctx context.Context) {
 
 	m.db.AutoMigrate(&Org{})
 	m.db.AutoMigrate(&Proj{})
+	m.db.AutoMigrate(&Source{})
 
 	m.EventLoggerEntry.GetEventHelper().Finish(event)
 	logger.Info("Bootstrapping repository.", event.ListPayloads()...)
@@ -397,16 +398,20 @@ func (m *MySql) UpdateOrg(org *Org) (bool, error) {
 func (m *MySql) ListProj(orgId int) ([]*Proj, error) {
 	projList := make([]*Proj, 0)
 
-	var res *gorm.DB
+	var err error
 	if orgId < 0 {
-		res = m.db.Find(&projList)
+		res := m.db.Find(&projList)
+		if res.Error != nil {
+			err = res.Error
+		}
 	} else {
-		res = m.db.Where("org_id = ?", orgId).Find(&projList)
+		associations := m.db.Model(&Org{Id: orgId}).Association("ProjList")
+		err = associations.Find(&projList)
 	}
 
-	if res.Error != nil {
-		m.ZapLoggerEntry.GetLogger().Warn("failed to list projects from DB", zap.Error(res.Error))
-		return projList, res.Error
+	if err != nil {
+		m.ZapLoggerEntry.GetLogger().Warn("failed to list projects from DB", zap.Error(err))
+		return projList, err
 	}
 	return projList, nil
 }
@@ -417,14 +422,11 @@ func (m *MySql) CreateProj(proj *Proj) (bool, error) {
 		return false, errors.New("nil project")
 	}
 
-	res := m.db.Where("org_id = ?", proj.OrgId).Create(proj)
-	if res.Error != nil {
-		m.ZapLoggerEntry.GetLogger().Warn("failed to insert project", zap.Error(res.Error))
-		return false, res.Error
-	}
+	err := m.db.Model(&Org{Id: proj.OrgId}).Association("ProjList").Append(proj)
 
-	if res.RowsAffected < 1 {
-		return false, fmt.Errorf("failed to create project with orgId:%d id:%d", proj.OrgId, proj.Id)
+	if err != nil {
+		m.ZapLoggerEntry.GetLogger().Warn("failed to insert project", zap.Error(err))
+		return false, err
 	}
 
 	return true, nil
@@ -433,7 +435,8 @@ func (m *MySql) CreateProj(proj *Proj) (bool, error) {
 // GetProj as function name described
 func (m *MySql) GetProj(projId int) (*Proj, error) {
 	proj := &Proj{}
-	res := m.db.Where("id = ?", projId).Find(proj)
+	res := m.db.Preload("Source").Where("id = ?", projId).Find(proj)
+
 	if res.Error != nil {
 		m.ZapLoggerEntry.GetLogger().Warn("failed to get project from DB", zap.Error(res.Error))
 		return nil, res.Error
@@ -467,14 +470,45 @@ func (m *MySql) UpdateProj(proj *Proj) (bool, error) {
 		return false, errors.New("nil project")
 	}
 
-	res := m.db.Save(proj)
+	err := m.db.Model(&Org{Id: proj.OrgId}).Association("ProjList").Replace(proj)
+
+	if err != nil {
+		m.ZapLoggerEntry.GetLogger().Warn("failed to update project to DB", zap.Error(err))
+		return false, err
+	}
+
+	return true, nil
+}
+
+// ******************************************** //
+// ************** Source related ************** //
+// ******************************************** //
+
+// CreateSource as function name described
+func (m *MySql) CreateSource(src *Source) (bool, error) {
+	if src == nil {
+		return false, errors.New("nil source")
+	}
+
+	err := m.db.Model(&Proj{Id: src.ProjId}).Association("Source").Append(src)
+	if err != nil {
+		m.ZapLoggerEntry.GetLogger().Warn("failed to insert source", zap.Error(err))
+		return false, err
+	}
+
+	return true, nil
+}
+
+// RemoveProj as function name described
+func (m *MySql) RemoveSource(sourceId int) (bool, error) {
+	res := m.db.Delete(&Source{}, sourceId)
 	if res.Error != nil {
-		m.ZapLoggerEntry.GetLogger().Warn("failed to update project to DB", zap.Error(res.Error))
+		m.ZapLoggerEntry.GetLogger().Warn("failed to delete source from DB", zap.Error(res.Error))
 		return false, res.Error
 	}
 
 	if res.RowsAffected < 1 {
-		return false, NewNotFoundf(ProjNotFoundMsg, proj.Id)
+		return false, NewNotFoundf(SourceNotFoundMsg, sourceId)
 	}
 
 	return true, nil
