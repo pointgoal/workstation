@@ -161,7 +161,7 @@ $ curl -X DELETE "http://localhost:8080/v1/org/4"
 | --- | --- |
 | GET /v1/proj?ordId=? | List projects |
 | PUT /v1/proj | Create project |
-| GET /v1/proj/{projId}?ordId=? | Get project |
+| GET /v1/proj/{projId} | Get project |
 | POST /v1/proj/{projId} | Update project |
 | DELETE /v1/proj/{projId} | Delete project |
 
