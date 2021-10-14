@@ -138,6 +138,8 @@ definitions:
         type: string
       updatedAt:
         type: string
+      user:
+        type: string
     type: object
 info:
   contact:
@@ -151,6 +153,23 @@ info:
   title: Workstation
   version: "1.0"
 paths:
+  /v1/oauth/callback/github:
+    get:
+      operationId: "40"
+      parameters:
+      - description: Code
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Oauth callback
+      tags:
+      - oauth
   /v1/org:
     get:
       operationId: "1"
@@ -390,4 +409,26 @@ paths:
       summary: delete source
       tags:
       - source
+  /v1/user/installations:
+    get:
+      operationId: "13"
+      parameters:
+      - description: Source
+        in: query
+        name: source
+        required: true
+        type: string
+      - description: user
+        in: query
+        name: user
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: List user installations
+      tags:
+      - installation
 swagger: "2.0"

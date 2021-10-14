@@ -17,11 +17,11 @@ import (
 
 const (
 	// EntryName name of entry
-	EntryName = "ws-project-name"
+	EntryName = "ws-controller"
 	// EntryType type of entry
-	EntryType = "ws-project"
+	EntryType = "ws-controller"
 	// EntryDescription description of entry
-	EntryDescription = "Entry for project management entry."
+	EntryDescription = "Entry for controller entry."
 )
 
 // BootConfig is a struct which is for unmarshalled YAML

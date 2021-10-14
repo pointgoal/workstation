@@ -135,4 +135,17 @@ type Repository interface {
 
 	// RemoveSource as function name described
 	RemoveSource(int) (bool, error)
+
+	// ************************************************* //
+	// ************** AccessToken related ************** //
+	// ************************************************* //
+
+	// UpsertAccessToken as function name described
+	UpsertAccessToken(*AccessToken) (bool, error)
+
+	// GetAccessToken as function name described
+	GetAccessToken(repoType, repoUser string) (*AccessToken, error)
+
+	// RemoveAccessToken as function name described
+	RemoveAccessToken(string, string) (bool, error)
 }

@@ -262,6 +262,7 @@ func (m *MySql) Bootstrap(ctx context.Context) {
 	m.db.AutoMigrate(&Org{})
 	m.db.AutoMigrate(&Proj{})
 	m.db.AutoMigrate(&Source{})
+	m.db.AutoMigrate(&AccessToken{})
 
 	m.EventLoggerEntry.GetEventHelper().Finish(event)
 	logger.Info("Bootstrapping repository.", event.ListPayloads()...)
@@ -509,6 +510,70 @@ func (m *MySql) RemoveSource(sourceId int) (bool, error) {
 
 	if res.RowsAffected < 1 {
 		return false, NewNotFoundf(SourceNotFoundMsg, sourceId)
+	}
+
+	return true, nil
+}
+
+// ************************************************* //
+// ************** AccessToken related ************** //
+// ************************************************* //
+
+// UpsertAccessToken as function name described
+func (m *MySql) UpsertAccessToken(token *AccessToken) (bool, error) {
+	if token == nil {
+		return false, errors.New("nil access token")
+	}
+
+	okToUpsert := false
+	tokenFromRepo, err := m.GetAccessToken(token.Type, token.User)
+	switch err.(type) {
+	case *NotFound:
+		okToUpsert = true
+	}
+
+	if tokenFromRepo == nil {
+		okToUpsert = true
+	}
+
+	if !okToUpsert {
+		return false, fmt.Errorf("failed to get access token with type:%s user:%s", token.Type, token.User)
+	}
+
+	res := m.db.Save(token)
+	if res.Error != nil || res.RowsAffected < 1 {
+		return false, fmt.Errorf("failed to upsert access token with type:%s user:%s", token.Type, token.User)
+	}
+
+	return true, nil
+}
+
+// GetAccessToken as function name described
+func (m *MySql) GetAccessToken(repoType, repoUser string) (*AccessToken, error) {
+	token := &AccessToken{}
+	res := m.db.Where("type = ? AND user = ?", repoType, repoUser).Find(token)
+	if res.Error != nil {
+		m.ZapLoggerEntry.GetLogger().Warn("failed to get access token from DB", zap.Error(res.Error))
+		return nil, res.Error
+	}
+
+	if res.RowsAffected < 1 {
+		return nil, NewNotFoundf(AccessTokenNotFoundMsg, repoType, repoUser)
+	}
+
+	return token, nil
+}
+
+// RemoveAccessToken as function name described
+func (m *MySql) RemoveAccessToken(repoType, repoUser string) (bool, error) {
+	res := m.db.Delete(&AccessToken{}, "type = ? AND user = ?", repoType, repoUser)
+	if res.Error != nil {
+		m.ZapLoggerEntry.GetLogger().Warn("failed to delete access token from DB", zap.Error(res.Error))
+		return false, res.Error
+	}
+
+	if res.RowsAffected < 1 {
+		return false, NewNotFoundf(AccessTokenNotFoundMsg, repoType, repoUser)
 	}
 
 	return true, nil

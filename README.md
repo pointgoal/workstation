@@ -23,6 +23,10 @@
     - [Source](#source)
       - [Create source](#create-source)
       - [Delete source](#delete-source)
+    - [Oauth](#oauth)
+      - [github](#github)
+    - [Installations](#installations)
+      - [Github](#github)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -257,4 +261,52 @@ $ curl -X DELETE "http://localhost:8080/v1/source/1"
 {
   "status": true
 }
+```
+
+### Oauth
+Provide oauth callback API, please do not call it manually. 
+
+It should be called from code repositories.
+
+#### github
+GET /v1/oauth/callback/github
+
+### Installations
+List installations from code repo.
+
+| API | Description |
+| --- | --- |
+| GET /v1/user/installations?source=?&user=? | List installations from remote code repo |
+
+#### Github
+User should make sure access token was stored in backend DB first.
+
+User need to install workstation from Web UI which will store access token automatically.
+
+```shell script
+$ curl -X GET "http://localhost:8080/v1/user/installations?source=github&user=dongxuny"
+[
+  {
+    "repoSource": "github",
+    "organization": "dongxuny",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/50768414?v=4",
+    "repos": [
+      {
+        "fullName": "dongxuny/awesome-go",
+        "name": "awesome-go"
+      }
+    ]
+  },
+  {
+    "repoSource": "github",
+    "organization": "pointgoal",
+    "avatarUrl": "https://avatars.githubusercontent.com/u/90323078?v=4",
+    "repos": [
+      {
+        "fullName": "pointgoal/community",
+        "name": "community"
+      }
+    ]
+  }
+]
 ```

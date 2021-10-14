@@ -8,6 +8,7 @@ package main
 import (
 	"context"
 	"github.com/pointgoal/workstation/pkg/controller"
+	"github.com/pointgoal/workstation/pkg/oauth"
 	"github.com/pointgoal/workstation/pkg/repository"
 	"github.com/rookie-ninja/rk-boot"
 	"github.com/rookie-ninja/rk-entry/entry"
@@ -18,6 +19,7 @@ import (
 func init() {
 	rkentry.RegisterEntryRegFunc(repository.RegisterRepositoryFromConfig)
 	rkentry.RegisterEntryRegFunc(controller.RegisterControllerFromConfig)
+	rkentry.RegisterEntryRegFunc(oauth.RegisterEntryFromConfig)
 }
 
 // @title Workstation

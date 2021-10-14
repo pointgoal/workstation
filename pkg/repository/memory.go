@@ -42,6 +42,7 @@ type Memory struct {
 	ZapLoggerEntry   *rkentry.ZapLoggerEntry   `json:"zapLoggerEntry" yaml:"zapLoggerEntry"`
 	EventLoggerEntry *rkentry.EventLoggerEntry `json:"eventLoggerEntry" yaml:"eventLoggerEntry"`
 	orgMap           map[int]*Org              `json:"-" yaml:"-"`
+	AccessTokenList  []*AccessToken            `json:"-" yaml:"-"`
 	lastIndex        map[interface{}]int       `json:"-" yaml:"-"`
 }
 
@@ -360,6 +361,13 @@ func (m *Memory) assignRequiredFields(in interface{}) {
 		now := time.Now()
 		v.CreatedAt = now
 		v.UpdatedAt = now
+	case *AccessToken:
+		id := m.lastIndex[accessTokenKey] + 1
+		m.lastIndex[accessTokenKey] = id
+		v.Id = id
+		now := time.Now()
+		v.CreatedAt = now
+		v.UpdatedAt = now
 	}
 }
 
@@ -405,6 +413,62 @@ func (m *Memory) RemoveSource(sourceId int) (bool, error) {
 
 		org.ProjList[index].Source = nil
 	}
+
+	return true, nil
+}
+
+// ************************************************* //
+// ************** AccessToken related ************** //
+// ************************************************* //
+
+// UpsertAccessToken as function name described
+func (m *Memory) UpsertAccessToken(token *AccessToken) (bool, error) {
+	if token == nil {
+		return false, errors.New("nil access token")
+	}
+
+	m.assignRequiredFields(token)
+
+	// return error if token exist
+	tokenFromRepo, _ := m.GetAccessToken(token.Type, token.User)
+	if tokenFromRepo == nil {
+		m.AccessTokenList = append(m.AccessTokenList, token)
+	} else {
+		tokenFromRepo.Token = token.Token
+	}
+
+	return true, nil
+}
+
+// GetAccessToken as function name described
+func (m *Memory) GetAccessToken(repoType, repoUser string) (*AccessToken, error) {
+	for i := range m.AccessTokenList {
+		token := m.AccessTokenList[i]
+		if token.Type == repoType && token.User == repoUser {
+			return token, nil
+		}
+	}
+
+	return nil, NewNotFoundf(AccessTokenNotFoundMsg, repoType, repoUser)
+}
+
+// RemoveAccessToken as function name described
+func (m *Memory) RemoveAccessToken(repoType, repoUser string) (bool, error) {
+	index := -1
+
+	for i := range m.AccessTokenList {
+		token := m.AccessTokenList[i]
+		if token.Type == repoType && token.User == repoUser {
+			index = i
+			break
+		}
+	}
+
+	if index < 0 {
+		return false, NewNotFoundf(AccessTokenNotFoundMsg, repoType, repoUser)
+	}
+
+	m.AccessTokenList = append(m.AccessTokenList[:index], m.AccessTokenList[index+1:]...)
 
 	return true, nil
 }

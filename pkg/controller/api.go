@@ -41,6 +41,9 @@ func initApi() {
 	// Source
 	ginEntry.Router.PUT("/v1/source", CreateSource)
 	ginEntry.Router.DELETE("/v1/source/:sourceId", DeleteSource)
+
+	// Installations
+	ginEntry.Router.GET("/v1/user/installations", ListUserInstallations)
 }
 
 func makeInternalError(ctx *gin.Context, message string, details ...interface{}) {
@@ -532,6 +535,41 @@ func DeleteSource(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, &DeleteSourceResponse{
 		Status: succ,
 	})
+}
+
+// ListUserInstallations
+// @Summary List user installations
+// @Id 13
+// @version 1.0
+// @Tags installation
+// @produce application/json
+// @Param source query string true "Source"
+// @Param user query string true "user"
+// @Success 200
+// @Router /v1/user/installations [get]
+func ListUserInstallations(ctx *gin.Context) {
+	user := ctx.Query("user")
+	source := ctx.Query("source")
+
+	var res []*Installation
+	var err error
+
+	switch source {
+	case "github":
+		res, err = ListUserInstallationsFromGithub(user)
+	default:
+		err = fmt.Errorf("unrecognized source:%s with user:%s", source, user)
+	}
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, rkerror.New(
+			rkerror.WithHttpCode(http.StatusBadRequest),
+			rkerror.WithMessage(fmt.Sprintf("failed to list user installations from %s", source)),
+			rkerror.WithDetails(err)))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, res)
 }
 
 func isOrgExist(ctx *gin.Context, controller *Controller, orgId int) (*repository.Org, bool) {

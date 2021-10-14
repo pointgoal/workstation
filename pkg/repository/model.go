@@ -13,9 +13,10 @@ import (
 )
 
 var (
-	orgKey    = &Org{}
-	projKey   = &Proj{}
-	sourceKey = &Source{}
+	orgKey         = &Org{}
+	projKey        = &Proj{}
+	sourceKey      = &Source{}
+	accessTokenKey = &AccessToken{}
 )
 
 // ************************************************ //
@@ -100,6 +101,7 @@ type Source struct {
 	ProjId     int    `yaml:"projId" json:"projId" gorm:"index"`
 	Type       string `yaml:"type" json:"type" gorm:"index"`
 	Repository string `yaml:"repository" json:"repository"`
+	User       string `yaml:"user" json:"user"`
 }
 
 // NewSource create a project with params.
@@ -114,5 +116,33 @@ func NewSource(repoType, repository string) *Source {
 // String will marshal source into json format.
 func (src *Source) String() string {
 	bytes, _ := json.Marshal(src)
+	return string(bytes)
+}
+
+// ************************************************* //
+// ************** AccessToken related ************** //
+// ************************************************* //
+
+type AccessToken struct {
+	Base
+	Id    int    `yaml:"id" json:"id" gorm:"primaryKey"`
+	Type  string `yaml:"type" json:"type" gorm:"index"`
+	User  string `yaml:"user" json:"user"`
+	Token string `yaml:"-" json:"-"`
+}
+
+// NewAccessToken create a project with params.
+// A new name will be assigned with random Id if name is empty.
+func NewAccessToken(repoType, repoUser, repoToken string) *AccessToken {
+	return &AccessToken{
+		Type:  repoType,
+		User:  repoUser,
+		Token: repoToken,
+	}
+}
+
+// String will marshal token into json format.
+func (token *AccessToken) String() string {
+	bytes, _ := json.Marshal(token)
 	return string(bytes)
 }
