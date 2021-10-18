@@ -69,7 +69,8 @@ type CreateProjResponse struct {
 
 // CreateProjRequest request body
 type CreateProjRequest struct {
-	Name string `yaml:"name" json:"name"`
+	OrgId int    `yaml:"orgId" json:"orgId"`
+	Name  string `yaml:"name" json:"name"`
 }
 
 // DeleteProjResponse response of delete project

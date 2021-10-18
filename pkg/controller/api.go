@@ -343,14 +343,11 @@ func GetProj(ctx *gin.Context) {
 // @version 1.0
 // @Tags project
 // @produce application/json
-// @Param orgId query int true "Organization Id"
 // @Param project body CreateProjRequest true "Project"
 // @Success 200 {object} CreateProjResponse
 // @Router /v1/proj [put]
 func CreateProj(ctx *gin.Context) {
 	controller := GetController()
-	orgId := utils.ToInt(ctx.Query("orgId"))
-
 	// 1: bind request
 	req := &CreateProjRequest{}
 	if err := ctx.ShouldBind(req); err != nil {
@@ -361,21 +358,21 @@ func CreateProj(ctx *gin.Context) {
 	}
 
 	// 2: get organization from repository
-	if _, ok := isOrgExist(ctx, controller, orgId); !ok {
+	if _, ok := isOrgExist(ctx, controller, req.OrgId); !ok {
 		return
 	}
 
 	// 3: create project
 	proj := repository.NewProj(req.Name)
-	proj.OrgId = orgId
+	proj.OrgId = req.OrgId
 	_, err := controller.Repo.CreateProj(proj)
 	if err != nil {
-		makeInternalError(ctx, fmt.Sprintf("failed to create project with orgId:%d", orgId), err)
+		makeInternalError(ctx, fmt.Sprintf("failed to create project with orgId:%d", req.OrgId), err)
 		return
 	}
 
 	ctx.JSON(http.StatusOK, &CreateProjResponse{
-		OrgId:  orgId,
+		OrgId:  req.OrgId,
 		ProjId: proj.Id,
 	})
 }
