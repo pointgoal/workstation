@@ -132,11 +132,13 @@ type ListCommitsResponse struct {
 }
 
 type Commit struct {
-	Id        string    `yaml:"id" json:"id"`
-	Message   string    `yaml:"message" json:"message"`
-	Date      time.Time `yaml:"date" json:"date"`
-	Committer string    `yaml:"committer" json:"committer"`
-	Artifact  *Artifact `yaml:"artifact" json:"artifact"`
+	Id           string    `yaml:"id" json:"id"`
+	Url          string    `yaml:"url" json:"url"`
+	Message      string    `yaml:"message" json:"message"`
+	Date         time.Time `yaml:"date" json:"date"`
+	Committer    string    `yaml:"committer" json:"committer"`
+	CommitterUrl string    `yaml:"committerUrl" json:"committerUrl"`
+	Artifact     *Artifact `yaml:"artifact" json:"artifact"`
 }
 
 type Artifact struct {

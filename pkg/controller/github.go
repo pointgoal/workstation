@@ -102,10 +102,12 @@ func ListCommitsFromGithub(src *repository.Source, branch, accessToken string, p
 
 	for i := range commits {
 		res = append(res, &Commit{
-			Id:        commits[i].GetSHA(),
-			Message:   commits[i].GetCommit().GetMessage(),
-			Date:      commits[i].GetCommit().GetCommitter().GetDate(),
-			Committer: commits[i].GetCommit().GetCommitter().GetName(),
+			Id:           commits[i].GetSHA(),
+			Url:          commits[i].GetHTMLURL(),
+			Message:      commits[i].GetCommit().GetMessage(),
+			Date:         commits[i].GetCommit().GetCommitter().GetDate(),
+			Committer:    commits[i].GetCommit().GetCommitter().GetName(),
+			CommitterUrl: commits[i].GetCommitter().GetHTMLURL(),
 		})
 	}
 

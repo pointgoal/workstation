@@ -307,9 +307,11 @@ $ curl -X GET "http://localhost:8080/v1/source/2/commits?branch=master&perPage=1
   "commits": [
     {
       "id": "2ab83470e96b196f7f365225ac5bc6bec7d7f8f7",
+      "url": "https://github.com/rookie-ninja/rk-boot/commit/2ab83470e96b196f7f365225ac5bc6bec7d7f8f7",
       "message": "Merge pull request #12 from dongxuny/master\n\nAdd build and test instructions in README.md",
       "date": "2021-10-19T05:30:38Z",
       "committer": "GitHub",
+      "committerUrl": "https://github.com/web-flow",
       "artifact": null
     }
   ]
