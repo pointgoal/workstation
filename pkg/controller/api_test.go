@@ -12,6 +12,7 @@ import (
 	"github.com/rookie-ninja/rk-gin/boot"
 	"github.com/stretchr/testify/assert"
 	httptest "github.com/stretchr/testify/http"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -231,10 +232,14 @@ func TestCreateProj(t *testing.T) {
 	// expect 404
 	writer := &httptest.TestResponseWriter{}
 	ctx, _ := gin.CreateTestContext(writer)
-	stringReader := strings.NewReader(`{name:"ut-name"}`)
+
+	stringReader := strings.NewReader(`{"name":"ut-name","orgId":1}`)
 	ctx.Request = &http.Request{
-		Body: ioutil.NopCloser(stringReader),
+		Body: io.NopCloser(stringReader),
 		URL:  &url.URL{},
+		Header: map[string][]string{
+			"Content-Type": {"application/json"},
+		},
 	}
 	CreateProj(ctx)
 	assert.Equal(t, http.StatusNotFound, writer.StatusCode)
@@ -242,11 +247,12 @@ func TestCreateProj(t *testing.T) {
 	// expect 200
 	writer = &httptest.TestResponseWriter{}
 	ctx, _ = gin.CreateTestContext(writer)
-	stringReader = strings.NewReader(`{name:"ut-name"}`)
+	stringReader = strings.NewReader(`{"name":"ut-name","orgId":1}`)
 	ctx.Request = &http.Request{
-		Body: ioutil.NopCloser(stringReader),
-		URL: &url.URL{
-			RawQuery: "orgId=1;",
+		Body: io.NopCloser(stringReader),
+		URL:  &url.URL{},
+		Header: map[string][]string{
+			"Content-Type": {"application/json"},
 		},
 	}
 	repo.CreateOrg(&repository.Org{

@@ -2,9 +2,16 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/go-github/v39/github"
 	"github.com/pointgoal/workstation/pkg/repository"
 	"golang.org/x/oauth2"
+	"strings"
+)
+
+const (
+	PerPageDefault = 10
+	PageDefault    = 1
 )
 
 type Installation struct {
@@ -32,13 +39,7 @@ func ListUserInstallationsFromGithub(user string) ([]*Installation, error) {
 		return res, err
 	}
 
-	ts := oauth2.StaticTokenSource(
-		&oauth2.Token{
-			AccessToken: accessToken.Token,
-			TokenType:   "token",
-		},
-	)
-	client := github.NewClient(oauth2.NewClient(context.Background(), ts))
+	client := getGithubClient(accessToken.Token)
 	listOpts := &github.ListOptions{}
 
 	installsFromGithub, _, err := client.Apps.ListUserInstallations(context.Background(), listOpts)
@@ -71,4 +72,68 @@ func ListUserInstallationsFromGithub(user string) ([]*Installation, error) {
 	}
 
 	return res, nil
+}
+
+// ListCommitsFromGithub returns commits from remote github repository.
+// The repos would have access permission with Github app named as workstation.
+func ListCommitsFromGithub(src *repository.Source, branch, accessToken string, perPage, page int) ([]*Commit, error) {
+	res := make([]*Commit, 0)
+
+	client := getGithubClient(accessToken)
+
+	opts := &github.CommitsListOptions{
+		SHA: branch,
+		ListOptions: github.ListOptions{
+			PerPage: perPage,
+			Page:    page,
+		},
+	}
+
+	// repo was stored with format of owner/repo
+	srcTokens := strings.Split(src.Repository, "/")
+	if len(srcTokens) < 2 {
+		return res, fmt.Errorf("invalid repository in DB repo:%s", src.Repository)
+	}
+
+	commits, _, err := client.Repositories.ListCommits(context.Background(), srcTokens[0], srcTokens[1], opts)
+	if err != nil {
+		return res, err
+	}
+
+	for i := range commits {
+		res = append(res, &Commit{
+			Id:        commits[i].GetSHA(),
+			Message:   commits[i].GetCommit().GetMessage(),
+			Date:      commits[i].GetCommit().GetCommitter().GetDate(),
+			Committer: commits[i].GetCommit().GetCommitter().GetName(),
+		})
+	}
+
+	return res, nil
+}
+
+// normalize page and perPage
+func normalizePage(perPage, page int) (int, int) {
+	if perPage < 0 {
+		perPage = PerPageDefault
+	}
+
+	if page < 0 {
+		page = PageDefault
+	}
+
+	return perPage, page
+}
+
+// Get github client with accessToken
+func getGithubClient(accessToken string) *github.Client {
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{
+			AccessToken: accessToken,
+			TokenType:   "token",
+		},
+	)
+	client := github.NewClient(oauth2.NewClient(context.Background(), ts))
+
+	return client
 }

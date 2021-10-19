@@ -136,6 +136,9 @@ type Repository interface {
 	// RemoveSource as function name described
 	RemoveSource(int) (bool, error)
 
+	// GetSource as function name described
+	GetSource(int) (*Source, error)
+
 	// ************************************************* //
 	// ************** AccessToken related ************** //
 	// ************************************************* //

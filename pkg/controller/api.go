@@ -44,9 +44,9 @@ func initApi() {
 
 	// Installations
 	ginEntry.Router.GET("/v1/user/installations", ListUserInstallations)
-
 	// Pipeline templates
 	ginEntry.Router.GET("/v1/pipeline/template", ListPipelineTemplate)
+	ginEntry.Router.GET("/v1/source/:sourceId/commits", ListCommits)
 }
 
 func makeInternalError(ctx *gin.Context, message string, details ...interface{}) {
@@ -368,6 +368,8 @@ func CreateProj(ctx *gin.Context) {
 		return
 	}
 
+	fmt.Println(req)
+
 	// 2: get organization from repository
 	if _, ok := isOrgExist(ctx, controller, req.OrgId); !ok {
 		return
@@ -609,6 +611,52 @@ func ListPipelineTemplate(ctx *gin.Context) {
 	})
 }
 
+// ListCommits
+// @Summary List user installation commits
+// @Id 15
+// @version 1.0
+// @Tags installation
+// @produce application/json
+// @Param sourceId path int true "Source Id"
+// @Param branch query string true "Branch"
+// @Param perPage query int false "Number of commits per page"
+// @Param page query int false "Page number to fetch"
+// @Success 200
+// @Router /v1/source/{sourceId}/commits [get]
+func ListCommits(ctx *gin.Context) {
+	controller := GetController()
+
+	sourceId := utils.ToInt(ctx.Param("sourceId"))
+	branch := ctx.Query("branch")
+	perPage, page := normalizePage(utils.ToInt(ctx.Query("perPage")), utils.ToInt(ctx.Query("page")))
+
+	// 1: get source from repository
+	sourceFromRepo, ok := isSourceExist(ctx, controller, sourceId)
+	if !ok || sourceFromRepo == nil {
+		return
+	}
+
+	// 2: get access token from repository
+	tokenFromRepo, ok := isAccessTokenExist(ctx, controller, sourceFromRepo.Type, sourceFromRepo.User)
+	if !ok || sourceFromRepo == nil {
+		return
+	}
+
+	// 3: List commits
+	commits, err := ListCommitsFromGithub(sourceFromRepo, branch, tokenFromRepo.Token, perPage, page)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, rkerror.New(
+			rkerror.WithHttpCode(http.StatusInternalServerError),
+			rkerror.WithMessage("Failed to list commits from github"),
+			rkerror.WithDetails(err)))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, &ListCommitsResponse{
+		Commits: commits,
+	})
+}
+
 func isOrgExist(ctx *gin.Context, controller *Controller, orgId int) (*repository.Org, bool) {
 	org, err := controller.Repo.GetOrg(orgId)
 	if err != nil {
@@ -645,4 +693,42 @@ func isProjExist(ctx *gin.Context, controller *Controller, projId int) (*reposit
 	}
 
 	return proj, true
+}
+
+func isSourceExist(ctx *gin.Context, controller *Controller, sourceId int) (*repository.Source, bool) {
+	src, err := controller.Repo.GetSource(sourceId)
+	if err != nil {
+		switch err.(type) {
+		case *repository.NotFound:
+			makeNotFoundError(ctx, fmt.Sprintf(repository.SourceNotFoundMsg, sourceId))
+		default:
+			makeInternalError(ctx, fmt.Sprintf(repository.SourceFailedToGetMsg, sourceId), err)
+		}
+		return nil, false
+	}
+	if src == nil {
+		makeNotFoundError(ctx, fmt.Sprintf(repository.SourceNotFoundMsg, sourceId))
+		return nil, false
+	}
+
+	return src, true
+}
+
+func isAccessTokenExist(ctx *gin.Context, controller *Controller, repoType, repoUser string) (*repository.AccessToken, bool) {
+	token, err := controller.Repo.GetAccessToken(repoType, repoUser)
+	if err != nil {
+		switch err.(type) {
+		case *repository.NotFound:
+			makeNotFoundError(ctx, fmt.Sprintf(repository.AccessTokenNotFoundMsg, repoType, repoUser))
+		default:
+			makeInternalError(ctx, fmt.Sprintf(repository.AccessTokenFailedToGetMsg, repoType, repoUser), err)
+		}
+		return nil, false
+	}
+	if token == nil {
+		makeNotFoundError(ctx, fmt.Sprintf(repository.AccessTokenNotFoundMsg, repoType, repoUser))
+		return nil, false
+	}
+
+	return token, true
 }

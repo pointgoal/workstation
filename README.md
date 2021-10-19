@@ -6,7 +6,6 @@
   - [Quick start](#quick-start)
   - [Backend repository](#backend-repository)
     - [MySql](#mysql)
-    - [memory](#memory)
   - [API](#api)
     - [Organizations](#organizations)
       - [List organizations](#list-organizations)
@@ -27,6 +26,7 @@
       - [github](#github)
     - [Installations](#installations)
       - [Github](#github)
+      - [List commits from github](#list-commits-from-github)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -45,7 +45,7 @@ $ go run main.go
 ```
 
 ## Backend repository
-Currently, we support three types of repository which are memory and MySql.
+Currently, we support one types of repository which is MySql.
 
 ### MySql
 Configure workstation to use mysql as backend repository
@@ -66,18 +66,6 @@ repository:
       - "charset=utf8mb4"
       - "parseTime=True"
       - "loc=Local"
-```
-
-### memory
-Configure workstation to use local memory as backend repository
-
-- boot.yaml
-```yaml
----
-...
-repository:
-  enabled: true
-  provider: memory
 ```
 
 ## API
@@ -277,6 +265,7 @@ List installations from code repo.
 | API | Description |
 | --- | --- |
 | GET /v1/user/installations?source=?&user=? | List installations from remote code repo |
+| GET /v1/source/{sourceId}/commits?branch=?&perPage=?&page=? | List user installation commits |
 
 #### Github
 User should make sure access token was stored in backend DB first.
@@ -309,4 +298,20 @@ $ curl -X GET "http://localhost:8080/v1/user/installations?source=github&user=do
     ]
   }
 ]
+```
+
+#### List commits from github
+```
+$ curl -X GET "http://localhost:8080/v1/source/2/commits?branch=master&perPage=1" -H  "accept: application/json"
+{
+  "commits": [
+    {
+      "id": "2ab83470e96b196f7f365225ac5bc6bec7d7f8f7",
+      "message": "Merge pull request #12 from dongxuny/master\n\nAdd build and test instructions in README.md",
+      "date": "2021-10-19T05:30:38Z",
+      "committer": "GitHub",
+      "artifact": null
+    }
+  ]
+}
 ```

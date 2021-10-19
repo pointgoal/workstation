@@ -243,6 +243,8 @@ func (m *Memory) GetProj(projId int) (*Proj, error) {
 
 // RemoveProj as function name described
 func (m *Memory) RemoveProj(projId int) (bool, error) {
+	var found bool
+
 	for i := range m.orgMap {
 		org := m.orgMap[i]
 		// Remove from proj list
@@ -250,14 +252,18 @@ func (m *Memory) RemoveProj(projId int) (bool, error) {
 		for index = range org.ProjList {
 			proj := org.ProjList[index]
 			if proj.Id == projId {
+				found = true
 				break
 			}
 		}
 
-		if index < 0 {
-			return false, NewNotFoundf(ProjNotFoundMsg, projId)
+		if found {
+			org.ProjList = append(org.ProjList[:index], org.ProjList[i+index:]...)
 		}
-		org.ProjList = append(org.ProjList[:index], org.ProjList[index+1:]...)
+	}
+
+	if !found {
+		return false, NewNotFoundf(ProjNotFoundMsg, projId)
 	}
 
 	return true, nil
@@ -396,6 +402,8 @@ func (m *Memory) CreateSource(src *Source) (bool, error) {
 
 // RemoveSource as function name described
 func (m *Memory) RemoveSource(sourceId int) (bool, error) {
+	var found bool
+
 	for i := range m.orgMap {
 		org := m.orgMap[i]
 		// Remove from proj list
@@ -403,18 +411,52 @@ func (m *Memory) RemoveSource(sourceId int) (bool, error) {
 		for index = range org.ProjList {
 			proj := org.ProjList[index]
 			if proj.Source != nil && proj.Source.Id == sourceId {
+				found = true
 				break
 			}
 		}
 
-		if index < 0 {
-			return false, NewNotFoundf(SourceNotFoundMsg, sourceId)
+		if found {
+			org.ProjList[index].Source = nil
 		}
+	}
 
-		org.ProjList[index].Source = nil
+	if !found {
+		return false, NewNotFoundf(SourceNotFoundMsg, sourceId)
 	}
 
 	return true, nil
+}
+
+// GetSource as function name described
+func (m *Memory) GetSource(sourceId int) (*Source, error) {
+	var res *Source
+
+	for i := range m.orgMap {
+		org := m.orgMap[i]
+		// Remove from proj list
+		for i = range org.ProjList {
+			proj := org.ProjList[i]
+			if proj.Source != nil && proj.Source.Id == sourceId {
+				res = proj.Source
+				break
+			}
+		}
+
+		if res != nil {
+			break
+		}
+	}
+
+	if res == nil {
+		return res, NewNotFoundf(SourceNotFoundMsg, sourceId)
+	}
+
+	return res, nil
+}
+
+func (m *Memory) ListPipelineTemplate() ([]*PipelineTemplate, error) {
+	panic("implement me")
 }
 
 // ************************************************* //

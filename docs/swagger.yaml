@@ -8,6 +8,8 @@ definitions:
     properties:
       name:
         type: string
+      orgId:
+        type: integer
     type: object
   controller.CreateProjResponse:
     properties:
@@ -57,6 +59,13 @@ definitions:
           $ref: '#/definitions/controller.Org'
         type: array
     type: object
+  controller.ListPipelineTemplateResponse:
+    properties:
+      templateList:
+        items:
+          $ref: '#/definitions/controller.PipelineTemplate'
+        type: array
+    type: object
   controller.ListProjResponse:
     properties:
       projList:
@@ -72,6 +81,11 @@ definitions:
         items:
           type: integer
         type: array
+    type: object
+  controller.PipelineTemplate:
+    properties:
+      meta:
+        $ref: '#/definitions/repository.PipelineTemplate'
     type: object
   controller.Proj:
     properties:
@@ -104,6 +118,21 @@ definitions:
         type: string
       id:
         type: integer
+      name:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  repository.PipelineTemplate:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      language:
+        type: string
       name:
         type: string
       updatedAt:
@@ -262,6 +291,19 @@ paths:
       summary: Update organization
       tags:
       - organization
+  /v1/pipeline/template:
+    get:
+      operationId: "14"
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.ListPipelineTemplateResponse'
+      summary: List pipeline templates
+      tags:
+      - pipeline
   /v1/proj:
     get:
       operationId: "6"
@@ -283,11 +325,6 @@ paths:
     put:
       operationId: "8"
       parameters:
-      - description: Organization Id
-        in: query
-        name: orgId
-        required: true
-        type: integer
       - description: Project
         in: body
         name: project
@@ -409,6 +446,36 @@ paths:
       summary: delete source
       tags:
       - source
+  /v1/source/{sourceId}/commits:
+    get:
+      operationId: "15"
+      parameters:
+      - description: Source Id
+        in: path
+        name: sourceId
+        required: true
+        type: integer
+      - description: Branch
+        in: query
+        name: branch
+        required: true
+        type: string
+      - description: Number of commits per page
+        in: query
+        name: perPage
+        type: integer
+      - description: Page number to fetch
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: List user installation commits
+      tags:
+      - installation
   /v1/user/installations:
     get:
       operationId: "13"

@@ -516,6 +516,22 @@ func (m *MySql) RemoveSource(sourceId int) (bool, error) {
 	return true, nil
 }
 
+// GetSource as function name described
+func (m *MySql) GetSource(sourceId int) (*Source, error) {
+	src := &Source{}
+	res := m.db.Where("id = ?", sourceId).Find(src)
+	if res.Error != nil {
+		m.ZapLoggerEntry.GetLogger().Warn("failed to find source", zap.Error(res.Error))
+		return nil, res.Error
+	}
+
+	if res.RowsAffected < 1 {
+		return nil, NewNotFoundf(SourceNotFoundMsg, sourceId)
+	}
+
+	return src, nil
+}
+
 // ************************************************* //
 // ************** AccessToken related ************** //
 // ************************************************* //

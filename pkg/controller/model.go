@@ -1,6 +1,9 @@
 package controller
 
-import "github.com/pointgoal/workstation/pkg/repository"
+import (
+	"github.com/pointgoal/workstation/pkg/repository"
+	"time"
+)
 
 // ************************************************** //
 // ************** Organization related ************** //
@@ -110,7 +113,7 @@ type DeleteSourceResponse struct {
 }
 
 // ************************************************** //
-// ************** PipelineTemplate related ************** //
+// ************ PipelineTemplate related ************ //
 // ************************************************** //
 
 // PipelineTemplate is model for API response
@@ -121,4 +124,22 @@ type PipelineTemplate struct {
 // ListPipelineTemplateResponse response of list organization
 type ListPipelineTemplateResponse struct {
 	TemplateList []*PipelineTemplate `yaml:"templateList" json:"templateList"`
+}
+
+// ListCommitsResponse response of user commits of source
+type ListCommitsResponse struct {
+	Commits []*Commit `yaml:"commits" json:"commits"`
+}
+
+type Commit struct {
+	Id        string    `yaml:"id" json:"id"`
+	Message   string    `yaml:"message" json:"message"`
+	Date      time.Time `yaml:"date" json:"date"`
+	Committer string    `yaml:"committer" json:"committer"`
+	Artifact  *Artifact `yaml:"artifact" json:"artifact"`
+}
+
+type Artifact struct {
+	Id   int    `yaml:"id" json:"id"`
+	Name string `yaml:"name" json:"name"`
 }

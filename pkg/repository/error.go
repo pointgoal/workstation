@@ -14,6 +14,7 @@ const (
 	OauthSourceNotFoundMsg     = "oauth source not found with source:%s"
 	AccessTokenAlreadyExistMsg = "access token already exist with type:%s user:%s"
 	AccessTokenNotFoundMsg     = "access token not found with type:%s user:%s"
+	AccessTokenFailedToGetMsg  = "failed to get access token with type:%s user:%s"
 )
 
 type NotFound struct {

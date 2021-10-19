@@ -197,6 +197,26 @@ var doc = `{
                 }
             }
         },
+        "/v1/pipeline/template": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "pipeline"
+                ],
+                "summary": "List pipeline templates",
+                "operationId": "14",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.ListPipelineTemplateResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/v1/proj": {
             "get": {
                 "produces": [
@@ -234,13 +254,6 @@ var doc = `{
                 "summary": "create project",
                 "operationId": "8",
                 "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Organization Id",
-                        "name": "orgId",
-                        "in": "query",
-                        "required": true
-                    },
                     {
                         "description": "Project",
                         "name": "project",
@@ -420,6 +433,51 @@ var doc = `{
                 }
             }
         },
+        "/v1/source/{sourceId}/commits": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "installation"
+                ],
+                "summary": "List user installation commits",
+                "operationId": "15",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Source Id",
+                        "name": "sourceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Branch",
+                        "name": "branch",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of commits per page",
+                        "name": "perPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number to fetch",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/v1/user/installations": {
             "get": {
                 "produces": [
@@ -468,6 +526,9 @@ var doc = `{
             "properties": {
                 "name": {
                     "type": "string"
+                },
+                "orgId": {
+                    "type": "integer"
                 }
             }
         },
@@ -547,6 +608,17 @@ var doc = `{
                 }
             }
         },
+        "controller.ListPipelineTemplateResponse": {
+            "type": "object",
+            "properties": {
+                "templateList": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/controller.PipelineTemplate"
+                    }
+                }
+            }
+        },
         "controller.ListProjResponse": {
             "type": "object",
             "properties": {
@@ -569,6 +641,14 @@ var doc = `{
                     "items": {
                         "type": "integer"
                     }
+                }
+            }
+        },
+        "controller.PipelineTemplate": {
+            "type": "object",
+            "properties": {
+                "meta": {
+                    "$ref": "#/definitions/repository.PipelineTemplate"
                 }
             }
         },
@@ -620,6 +700,29 @@ var doc = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "repository.PipelineTemplate": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "language": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
