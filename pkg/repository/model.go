@@ -146,3 +146,15 @@ func (token *AccessToken) String() string {
 	bytes, _ := json.Marshal(token)
 	return string(bytes)
 }
+
+// ************************************************* //
+// ************** PipelineTemplate related ************** //
+// ************************************************* //
+
+type PipelineTemplate struct {
+	Base
+	Id       int    `yaml:"id" json:"id" gorm:"primaryKey"`
+	Name     string `yaml:"name" json:"name"`
+	Language string `yaml:"language" json:"language"`
+	Content  string `yaml:"content" json:"content"`
+}

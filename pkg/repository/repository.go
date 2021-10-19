@@ -148,4 +148,11 @@ type Repository interface {
 
 	// RemoveAccessToken as function name described
 	RemoveAccessToken(string, string) (bool, error)
+
+	// ************************************************* //
+	// ************** PipelineTemplate related ************** //
+	// ************************************************* //
+
+	// ListPipelineTemplate as function name described
+	ListPipelineTemplate() ([]*PipelineTemplate, error)
 }

@@ -44,6 +44,9 @@ func initApi() {
 
 	// Installations
 	ginEntry.Router.GET("/v1/user/installations", ListUserInstallations)
+
+	// Pipeline templates
+	ginEntry.Router.GET("/v1/pipeline/template", ListPipelineTemplate)
 }
 
 func makeInternalError(ctx *gin.Context, message string, details ...interface{}) {
@@ -86,6 +89,14 @@ func convertProj(projFromRepo *repository.Proj) *Proj {
 	}
 
 	return proj
+}
+
+func convertPipelineTemplate(templateFromRepo *repository.PipelineTemplate) *PipelineTemplate {
+	template := &PipelineTemplate{
+		Meta: templateFromRepo,
+	}
+
+	return template
 }
 
 // ************************************************** //
@@ -567,6 +578,35 @@ func ListUserInstallations(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, res)
+}
+
+// ListPipelineTemplate
+// @Summary List pipeline templates
+// @Id 14
+// @version 1.0
+// @Tags pipeline
+// @produce application/json
+// @Success 200 {object} ListPipelineTemplateResponse
+// @Router /v1/pipeline/template [get]
+func ListPipelineTemplate(ctx *gin.Context) {
+	controller := GetController()
+	templateList := make([]*PipelineTemplate, 0)
+
+	// 1: list organization
+	templateListFromRepo, err := controller.Repo.ListPipelineTemplate()
+	if err != nil {
+		makeInternalError(ctx, "failed to list pipeline templates", err)
+		return
+	}
+
+	for i := range templateListFromRepo {
+		// convert to API model
+		templateList = append(templateList, convertPipelineTemplate(templateListFromRepo[i]))
+	}
+
+	ctx.JSON(http.StatusOK, &ListPipelineTemplateResponse{
+		TemplateList: templateList,
+	})
 }
 
 func isOrgExist(ctx *gin.Context, controller *Controller, orgId int) (*repository.Org, bool) {

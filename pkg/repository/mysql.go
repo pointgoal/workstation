@@ -263,6 +263,7 @@ func (m *MySql) Bootstrap(ctx context.Context) {
 	m.db.AutoMigrate(&Proj{})
 	m.db.AutoMigrate(&Source{})
 	m.db.AutoMigrate(&AccessToken{})
+	m.db.AutoMigrate(&PipelineTemplate{})
 
 	m.EventLoggerEntry.GetEventHelper().Finish(event)
 	logger.Info("Bootstrapping repository.", event.ListPayloads()...)
@@ -577,4 +578,21 @@ func (m *MySql) RemoveAccessToken(repoType, repoUser string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+// ************************************************** //
+// ************** PipelineTemplate related ************** //
+// ************************************************** //
+
+// ListPipelineTemplate as function name described
+func (m *MySql) ListPipelineTemplate() ([]*PipelineTemplate, error) {
+	ptList := make([]*PipelineTemplate, 0)
+	res := m.db.Find(&ptList)
+
+	if res.Error != nil {
+		m.ZapLoggerEntry.GetLogger().Warn("failed to list pipeline templates from DB", zap.Error(res.Error))
+		return ptList, res.Error
+	}
+
+	return ptList, nil
 }

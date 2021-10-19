@@ -108,3 +108,17 @@ type CreateSourceResponse struct {
 type DeleteSourceResponse struct {
 	Status bool `yaml:"status" json:"status"`
 }
+
+// ************************************************** //
+// ************** PipelineTemplate related ************** //
+// ************************************************** //
+
+// PipelineTemplate is model for API response
+type PipelineTemplate struct {
+	Meta *repository.PipelineTemplate `yaml:"meta" json:"meta"`
+}
+
+// ListPipelineTemplateResponse response of list organization
+type ListPipelineTemplateResponse struct {
+	TemplateList []*PipelineTemplate `yaml:"templateList" json:"templateList"`
+}
