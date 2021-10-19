@@ -74,6 +74,52 @@ func ListUserInstallationsFromGithub(user string) ([]*Installation, error) {
 	return res, nil
 }
 
+// ListBranchesAndTagsFromGithub returns branches and taqs from github repository.
+func ListBranchesAndTagsFromGithub(src *repository.Source, accessToken string, perPage, page int) ([]string, []string, error) {
+	branches := make([]string, 0)
+	tags := make([]string, 0)
+
+	client := getGithubClient(accessToken)
+
+	opts := &github.BranchListOptions{
+		ListOptions: github.ListOptions{
+			PerPage: perPage,
+			Page:    page,
+		},
+	}
+
+	// repo was stored with format of owner/repo
+	srcTokens := strings.Split(src.Repository, "/")
+	if len(srcTokens) < 2 {
+		return branches, tags, fmt.Errorf("invalid repository in DB repo:%s", src.Repository)
+	}
+
+	// 1: list branches
+	branchesFromRepo, _, err := client.Repositories.ListBranches(context.Background(), srcTokens[0], srcTokens[1], opts)
+	if err != nil {
+		return branches, tags, err
+	}
+
+	for i := range branchesFromRepo {
+		branches = append(branches, branchesFromRepo[i].GetName())
+	}
+
+	// 2: list tags
+	tagsFromRepo, _, err := client.Repositories.ListTags(context.Background(), srcTokens[0], srcTokens[1], &github.ListOptions{
+		PerPage: perPage,
+		Page:    page,
+	})
+	if err != nil {
+		return branches, tags, err
+	}
+
+	for i := range tagsFromRepo {
+		tags = append(tags, tagsFromRepo[i].GetName())
+	}
+
+	return branches, tags, nil
+}
+
 // ListCommitsFromGithub returns commits from remote github repository.
 // The repos would have access permission with Github app named as workstation.
 func ListCommitsFromGithub(src *repository.Source, branch, accessToken string, perPage, page int) ([]*Commit, error) {

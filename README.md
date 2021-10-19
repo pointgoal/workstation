@@ -27,6 +27,7 @@
     - [Installations](#installations)
       - [Github](#github)
       - [List commits from github](#list-commits-from-github)
+      - [List branches and tags from github](#list-branches-and-tags-from-github)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -266,6 +267,7 @@ List installations from code repo.
 | --- | --- |
 | GET /v1/user/installations?source=?&user=? | List installations from remote code repo |
 | GET /v1/source/{sourceId}/commits?branch=?&perPage=?&page=? | List user installation commits |
+| GET /v1/source/{sourceId}/branches?perPage=?&page=? | List branches and tags |
 
 #### Github
 User should make sure access token was stored in backend DB first.
@@ -314,6 +316,28 @@ $ curl -X GET "http://localhost:8080/v1/source/2/commits?branch=master&perPage=1
       "committerUrl": "https://github.com/web-flow",
       "artifact": null
     }
+  ]
+}
+```
+
+#### List branches and tags from github
+```
+$ curl -X GET "http://localhost:8080/v1/source/2/branches" -H  "accept: application/json"
+{
+  "branches": [
+    "master"
+  ],
+  "tags": [
+    "v1.2.6",
+    "v1.2.5",
+    "v1.2.4",
+    "v1.2.3",
+    "v1.2.2",
+    "v1.2.1",
+    "v1.2.0",
+    "v1.1.2",
+    "v1.1.1",
+    "v1.1.0"
   ]
 }
 ```

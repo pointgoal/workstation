@@ -44,9 +44,11 @@ func initApi() {
 
 	// Installations
 	ginEntry.Router.GET("/v1/user/installations", ListUserInstallations)
+	ginEntry.Router.GET("/v1/source/:sourceId/commits", ListCommits)
+	ginEntry.Router.GET("/v1/source/:sourceId/branches", ListBranchesAndTags)
+
 	// Pipeline templates
 	ginEntry.Router.GET("/v1/pipeline/template", ListPipelineTemplate)
-	ginEntry.Router.GET("/v1/source/:sourceId/commits", ListCommits)
 }
 
 func makeInternalError(ctx *gin.Context, message string, details ...interface{}) {
@@ -654,6 +656,51 @@ func ListCommits(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, &ListCommitsResponse{
 		Commits: commits,
+	})
+}
+
+// ListBranchesAndTags
+// @Summary List branches and tags
+// @Id 16
+// @version 1.0
+// @Tags installation
+// @produce application/json
+// @Param sourceId path int true "Source Id"
+// @Param perPage query int false "Number of commits per page"
+// @Param page query int false "Page number to fetch"
+// @Success 200
+// @Router /v1/source/{sourceId}/branches [get]
+func ListBranchesAndTags(ctx *gin.Context) {
+	controller := GetController()
+
+	sourceId := utils.ToInt(ctx.Param("sourceId"))
+	perPage, page := normalizePage(utils.ToInt(ctx.Query("perPage")), utils.ToInt(ctx.Query("page")))
+
+	// 1: get source from repository
+	sourceFromRepo, ok := isSourceExist(ctx, controller, sourceId)
+	if !ok || sourceFromRepo == nil {
+		return
+	}
+
+	// 2: get access token from repository
+	tokenFromRepo, ok := isAccessTokenExist(ctx, controller, sourceFromRepo.Type, sourceFromRepo.User)
+	if !ok || sourceFromRepo == nil {
+		return
+	}
+
+	// 3: List commits
+	branches, tags, err := ListBranchesAndTagsFromGithub(sourceFromRepo, tokenFromRepo.Token, perPage, page)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, rkerror.New(
+			rkerror.WithHttpCode(http.StatusInternalServerError),
+			rkerror.WithMessage("Failed to list commits from github"),
+			rkerror.WithDetails(err)))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, &ListBranchesAndTagsResponse{
+		Branches: branches,
+		Tags:     tags,
 	})
 }
 

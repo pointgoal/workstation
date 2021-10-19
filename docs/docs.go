@@ -433,6 +433,44 @@ var doc = `{
                 }
             }
         },
+        "/v1/source/{sourceId}/branches": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "installation"
+                ],
+                "summary": "List branches and tags",
+                "operationId": "16",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Source Id",
+                        "name": "sourceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of commits per page",
+                        "name": "perPage",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number to fetch",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/v1/source/{sourceId}/commits": {
             "get": {
                 "produces": [

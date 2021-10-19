@@ -446,6 +446,31 @@ paths:
       summary: delete source
       tags:
       - source
+  /v1/source/{sourceId}/branches:
+    get:
+      operationId: "16"
+      parameters:
+      - description: Source Id
+        in: path
+        name: sourceId
+        required: true
+        type: integer
+      - description: Number of commits per page
+        in: query
+        name: perPage
+        type: integer
+      - description: Page number to fetch
+        in: query
+        name: page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: List branches and tags
+      tags:
+      - installation
   /v1/source/{sourceId}/commits:
     get:
       operationId: "15"

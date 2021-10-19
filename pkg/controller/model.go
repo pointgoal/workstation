@@ -145,3 +145,8 @@ type Artifact struct {
 	Id   int    `yaml:"id" json:"id"`
 	Name string `yaml:"name" json:"name"`
 }
+
+type ListBranchesAndTagsResponse struct {
+	Branches []string `yaml:"branches" json:"branches"`
+	Tags     []string `yaml:"tags" json:"tags"`
+}
