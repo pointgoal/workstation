@@ -29,7 +29,7 @@ oauth:
   github:
     enabled: true
     clientId: "Iv1.27e4e24d5cf774cc"
-    clientSecret: "05beb691f3ddc838f423b9e0a77ef3b93985ef8e"
+    clientSecret: ""
 #    callbackHost: ""
 #    scopes: []
 controller:
