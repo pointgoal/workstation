@@ -380,6 +380,7 @@ func CreateProj(ctx *gin.Context) {
 	// 3: create project
 	proj := repository.NewProj(req.Name)
 	proj.OrgId = req.OrgId
+	proj.OrgName = req.OrgName
 	_, err := controller.Repo.CreateProj(proj)
 	if err != nil {
 		makeInternalError(ctx, fmt.Sprintf("failed to create project with orgId:%d", req.OrgId), err)

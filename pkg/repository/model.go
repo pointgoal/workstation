@@ -67,10 +67,11 @@ func (org *Org) String() string {
 // Proj defines projects in workstation.
 type Proj struct {
 	Base
-	Id     int     `yaml:"id" json:"id" gorm:"primaryKey"`
-	OrgId  int     `yaml:"orgId" json:"orgId" gorm:"index"`
-	Name   string  `yaml:"name" json:"name" gorm:"index"`
-	Source *Source `yaml:"source" json:"source"`
+	Id      int     `yaml:"id" json:"id" gorm:"primaryKey"`
+	OrgId   int     `yaml:"orgId" json:"orgId" gorm:"index"`
+	OrgName string  `yaml:"orgName" json:"orgName" gorm:"index"`
+	Name    string  `yaml:"name" json:"name" gorm:"index"`
+	Source  *Source `yaml:"source" json:"source"`
 }
 
 // NewProject create a project with params.
